@@ -30,13 +30,13 @@ body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);di
 
 /* TELA DE LOGIN */
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s;}
-.login-box{background:var(--w);padding:35px 30px;border-radius:12px;box-shadow:var(--sh);width:90%;max-width:360px;text-align:center;border-top:5px solid var(--p);}
-.login-box p{color:var(--tl);font-size:.85rem;margin-bottom:20px;}
-.login-box input{width:100%;padding:10px;margin-bottom:12px;border:1.5px solid var(--bor);border-radius:7px;outline:none;}
+.login-box{background:var(--w);padding:40px 30px;border-radius:12px;box-shadow:var(--sh);width:90%;max-width:380px;text-align:center;border-top:5px solid var(--p);}
+.login-box p{color:var(--tl);font-size:.85rem;margin-bottom:25px;}
+.login-box input{width:100%;padding:11px;margin-bottom:14px;border:1.5px solid var(--bor);border-radius:7px;outline:none;font-size:0.95rem;}
 .login-box input:focus{border-color:var(--p);}
-.login-box button{width:100%;padding:11px;background:var(--p);color:#fff;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:1rem;transition:background 0.2s;}
+.login-box button{width:100%;padding:12px;background:var(--p);color:#fff;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:1.05rem;transition:background 0.2s;margin-top:5px;}
 .login-box button:hover{background:var(--pd);}
-#login-error{color:var(--no);font-size:.8rem;margin-top:10px;display:none;}
+#login-error{color:var(--no);font-size:.85rem;margin-top:15px;display:none;font-weight:600;}
 
 /* Ocultar o app até logar */
 #app-container{display:none; width: 100%;}
@@ -44,8 +44,26 @@ body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);di
 /* SIDEBAR RETRÁTIL */
 #sb{width:64px;min-height:100vh;background:var(--p);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:300;transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow:hidden;white-space:nowrap;box-shadow:4px 0 15px rgba(0,0,0,0.05);}
 #sb:hover{width:210px;box-shadow:4px 0 25px rgba(0,0,0,0.15);}
-.sb-logo{padding:15px;display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.15);min-width:210px;height:65px;}
-.sidebar-logo{height:36px;width:160px;object-fit:contain;object-position:left center;}
+
+/* CONTAINER DA LOGO NO MENU COM ALTURA FIXA E ANIMAÇÃO DE CRESCIMENTO */
+.sb-logo {
+    padding: 0 13px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,.15);
+    min-width: 210px;
+    height: 85px; /* Altura fixa para os botões não pularem */
+}
+.sidebar-logo {
+    height: 38px; /* Tamanho pequeno quando fechado (mostra só o ícone) */
+    width: 180px;
+    object-fit: contain;
+    object-position: left center;
+    transition: height 0.3s ease;
+}
+#sb:hover .sidebar-logo {
+    height: 58px; /* Tamanho grande quando aberto (mostra a marca toda) */
+}
 
 nav{flex:1;padding:12px 0;}
 nav a{display:flex;align-items:center;gap:16px;padding:12px 20px;color:rgba(255,255,255,.82);text-decoration:none;font-size:.9rem;cursor:pointer;border-left:3px solid transparent;transition:background .2s, border .2s;min-width:210px;}
@@ -208,13 +226,13 @@ input:checked+.sl:before{transform:translateX(19px)}
 <body>
 
 <div id="loader">
-  <img src="logo-personalise.png" alt="Logo Personalise" style="height: 60px; margin-bottom: 15px;" />
-  <p style="color:var(--tl); font-size: 0.9rem;">Conectando à nuvem...</p>
+  <img src="logo-personalise.png" alt="Logo Personalise" style="height: 80px; margin-bottom: 20px;" />
+  <p style="color:var(--tl); font-size: 0.95rem;">Conectando à nuvem...</p>
 </div>
 
 <div id="login-screen" style="display:none;">
   <div class="login-box">
-    <img src="logo-personaliselogin.png" alt="Personalise" style="height: 65px; margin-bottom: 15px;" />
+    <img src="logo-personaliselogin.png" alt="Personalise Login" style="height: 120px; max-width: 100%; object-fit: contain; margin: 0 auto 20px auto; display: block;" />
     <p>Acesso restrito do sistema</p>
     <input type="email" id="log-email" placeholder="Seu E-mail" />
     <input type="password" id="log-pass" placeholder="Sua Senha" />
@@ -239,7 +257,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v5.1 · Cloud Segura</div>
+  <div class="sb-foot">v5.2 · Cloud Segura</div>
 </div>
 
 <div id="main">
