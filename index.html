@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Loja Personalise</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<style>
+/* Reset e Variáveis */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#784A91;--pd:#5a3570;--pl:#e8d5f5;--px:#f5eefb;
+  --bg:#f7f0fc;--text:#2d1a3d;--tl:#8a6a9a;
+  --ok:#2e7d32;--no:#c62828;--wa:#e65100;--in:#1565c0;
+  --bor:#ddc8f0;--sh:0 2px 14px rgba(120,74,145,.10);--w:#fff;
+}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;overflow-x:hidden;}
+
+/* Scrollbar Customizada */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bor); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--tl); }
+
+/* TELA DE LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s;}
+.login-box{background:var(--w);padding:35px 30px;border-radius:12px;box-shadow:var(--sh);width:90%;max-width:360px;text-align:center;border-top:5px solid var(--p);}
+.login-box p{color:var(--tl);font-size:.85rem;margin-bottom:20px;}
+.login-box input{width:100%;padding:10px;margin-bottom:12px;border:1.5px solid var(--bor);border-radius:7px;outline:none;}
+.login-box input:focus{border-color:var(--p);}
+.login-box button{width:100%;padding:11px;background:var(--p);color:#fff;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:1rem;transition:background 0.2s;}
+.login-box button:hover{background:var(--pd);}
+#login-error{color:var(--no);font-size:.8rem;margin-top:10px;display:none;}
+
+/* Ocultar o app até logar */
+#app-container{display:none; width: 100%;}
+
+/* SIDEBAR RETRÁTIL */
+#sb{width:64px;min-height:100vh;background:var(--p);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:300;transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow:hidden;white-space:nowrap;box-shadow:4px 0 15px rgba(0,0,0,0.05);}
+#sb:hover{width:210px;box-shadow:4px 0 25px rgba(0,0,0,0.15);}
+.sb-logo{padding:15px;display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.15);min-width:210px;height:65px;}
+.sidebar-logo{height:36px;width:160px;object-fit:contain;object-position:left center;}
+
+nav{flex:1;padding:12px 0;}
+nav a{display:flex;align-items:center;gap:16px;padding:12px 20px;color:rgba(255,255,255,.82);text-decoration:none;font-size:.9rem;cursor:pointer;border-left:3px solid transparent;transition:background .2s, border .2s;min-width:210px;}
+nav a:hover,nav a.on{background:rgba(255,255,255,.13);color:#fff;border-left-color:#c9a0e0;}
+nav a .ic{font-size:1.2rem;min-width:24px;text-align:center;}
+nav a .txt{opacity:0;transition:opacity 0.2s;}
+#sb:hover nav a .txt{opacity:1;}
+.sb-foot{padding:12px 14px;font-size:.65rem;color:rgba(255,255,255,.3);border-top:1px solid rgba(255,255,255,.1);text-align:center;opacity:0;transition:opacity 0.2s;min-width:210px;}
+#sb:hover .sb-foot{opacity:1;}
+
+/* MAIN CONTENT */
+#main{margin-left:64px;flex:1;padding:24px 26px;min-height:100vh;width:calc(100% - 64px);transition:margin-left 0.3s, width 0.3s;}
+.pg{display:none}.pg.on{display:block;animation: fadeIn 0.3s;}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+h2.ttl{font-size:1.4rem;color:var(--pd);margin-bottom:18px;display:flex;align-items:center;gap:7px}
+
+/* Alertas e Caixas */
+#alerts{margin-bottom:16px;display:flex;flex-direction:column;gap:6px}
+.al{display:flex;align-items:center;gap:8px;padding:8px 13px;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer}
+.al.da{background:#ffebee;color:var(--no);border:1px solid #ffcdd2}
+.al.wa{background:#fff3e0;color:var(--wa);border:1px solid #ffe0b2}
+.al.in{background:#e8eaf6;color:#3949ab;border:1px solid #c5cae9}
+.cx-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.cx{background:var(--w);border-radius:11px;padding:14px 16px;box-shadow:var(--sh);border-top:4px solid var(--p)}
+.cx.g{border-top-color:var(--ok)}.cx.r{border-top-color:var(--no)}.cx.b{border-top-color:var(--in)}
+.cx .lb{font-size:.68rem;color:var(--tl);text-transform:uppercase;font-weight:700;display:block;margin-bottom:3px}
+.cx .vl{font-size:1.35rem;font-weight:700;display:block}
+.cx .sb2{font-size:.68rem;color:var(--tl);display:block;margin-top:2px}
+.cr{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:13px;margin-bottom:20px}
+.dc{background:var(--w);border-radius:11px;padding:15px 17px;box-shadow:var(--sh);border-left:5px solid var(--p)}
+.dc.g{border-color:var(--ok)}.dc.r{border-color:var(--no)}.dc.b{border-color:var(--in)}.dc.o{border-color:var(--wa)}
+.dc .lb{font-size:.7rem;color:var(--tl);text-transform:uppercase;display:block;margin-bottom:3px}
+.dc .vl{font-size:1.5rem;font-weight:700;display:block}
+.dc .sb2{font-size:.7rem;color:var(--tl);display:block;margin-top:2px}
+
+/* Gráficos e Tabelas */
+.ch-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin-bottom:20px}
+.ch{background:var(--w);border-radius:11px;padding:15px;box-shadow:var(--sh)}
+.ch h3{font-size:.85rem;color:var(--p);margin-bottom:10px}
+.ch canvas{max-height:210px}
+.tc{background:var(--w);border-radius:11px;padding:15px;box-shadow:var(--sh);margin-bottom:16px;overflow-x:auto}
+.tc h3{font-size:.88rem;color:var(--p);margin-bottom:11px}
+table{width:100%;border-collapse:collapse;font-size:.84rem;min-width: 500px;}
+th{background:var(--pl);color:var(--pd);padding:8px 10px;text-align:left;font-size:.73rem;text-transform:uppercase}
+td{padding:7px 10px;border-bottom:1px solid var(--px);vertical-align:middle}
+tr:hover td{background:var(--px)}
+.bj{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.68rem;font-weight:700}
+.bj.g{background:#e8f5e9;color:var(--ok)}.bj.r{background:#ffebee;color:var(--no)}
+.bj.o{background:#fff3e0;color:var(--wa)}.bj.b{background:#e3f2fd;color:var(--in)}
+.bj.p{background:var(--pl);color:var(--pd)}
+
+/* Formulários Gerais */
+.fc{background:var(--w);border-radius:11px;padding:18px;box-shadow:var(--sh);margin-bottom:18px;max-width:760px}
+.fc h3{font-size:.92rem;color:var(--p);margin-bottom:14px}
+.fg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:11px}
+.fg{display:flex;flex-direction:column;gap:3px}.fg.fl{grid-column:1/-1}
+label{font-size:.74rem;color:var(--tl);font-weight:700}
+input,select,textarea{padding:7px 9px;border:1.5px solid var(--bor);border-radius:7px;font-size:.86rem;color:var(--text);background:var(--w);outline:none;transition:border .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--p)}
+textarea{resize:vertical;min-height:56px}
+.btn{padding:7px 15px;border:none;border-radius:7px;font-size:.84rem;font-weight:700;cursor:pointer;transition:background .18s;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:5px;}
+.bp{background:var(--p);color:#fff}.bp:hover{background:var(--pd)}
+.bs{background:var(--ok);color:#fff}.bd{background:var(--no);color:#fff}.bw{background:var(--wa);color:#fff}
+.btn.out{background:transparent;border:2px solid var(--p);color:var(--p)}.btn.out:hover{background:var(--px)}
+.sm{padding:4px 10px;font-size:.74rem}
+.fa{margin-top:12px;display:flex;gap:7px;flex-wrap:wrap}
+.fb{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px;align-items:flex-end}
+.fb input,.fb select{padding:6px 9px;font-size:.82rem;max-width:200px;border:1.5px solid var(--bor);border-radius:7px;outline:none}
+
+/* Toast e Modais */
+#toast{position:fixed;bottom:22px;right:22px;background:var(--pd);color:#fff;padding:10px 16px;border-radius:8px;font-size:.86rem;box-shadow:0 4px 12px rgba(0,0,0,.18);opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none}
+#toast.on{opacity:1}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;align-items:center;justify-content:center;padding:12px;backdrop-filter:blur(2px);}
+.mo.on{display:flex;animation:fadeIn 0.2s;}
+.mb{background:var(--w);border-radius:13px;width:100%;max-width:490px;box-shadow:0 12px 42px rgba(0,0,0,.22);overflow:hidden;display:flex;flex-direction:column;max-height:90vh}
+.mh{background:var(--w);color:var(--pd);padding:15px 17px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--px);}
+.mh h3{font-size:.98rem;display:flex;align-items:center;gap:6px;}
+.mc{background:var(--px);border:none;color:var(--p);width:26px;height:26px;border-radius:50%;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
+.mc:hover{background:var(--bor);}
+.my{padding:18px 17px;overflow-y:auto;flex:1}
+.mf{padding:12px 17px;border-top:1px solid var(--bor);display:flex;gap:7px;justify-content:flex-end;background:#faf6fd;flex-wrap:wrap}
+.sm-box{background:var(--w);border-radius:12px;padding:20px;max-width:350px;width:100%;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.sm-box h3{color:var(--p);margin-bottom:11px;font-size:.95rem}
+.sm-box p{margin-bottom:15px;color:var(--text);font-size:.86rem}
+.sm-box input{margin-bottom:12px}
+.ma{display:flex;gap:7px;justify-content:flex-end}
+
+/* Elementos Modal de Pedido */
+.ib{background:var(--px);border-radius:8px;padding:12px;margin-bottom:14px;font-size:.85rem;line-height:1.7}
+.ib strong{color:var(--pd)}
+.fr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;background:#f1f8e9;border-radius:8px;padding:10px;margin-bottom:14px;text-align:center;}
+.fi label{font-size:.65rem;font-weight:700;color:#666;text-transform:uppercase;display:block}
+.fi p{font-size:.95rem;font-weight:700;margin-top:2px}
+.tr2{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bor)}
+.tr2:last-of-type{border-bottom:none}
+.tl2{font-weight:700;font-size:.86rem}.ts{font-size:.7rem;color:var(--tl);margin-top:1px}
+.tg{position:relative;display:inline-block;width:42px;height:23px;flex-shrink:0}
+.tg input{opacity:0;width:0;height:0}
+.sl{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:23px;transition:.3s}
+.sl:before{content:'';position:absolute;height:17px;width:17px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+input:checked+.sl{background:var(--ok)}
+input:checked+.sl:before{transform:translateX(19px)}
+
+/* KANBAN SUPERIOR */
+.kb-top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:15px;border-bottom:2px solid var(--bor);padding-bottom:10px;}
+.ptabs{display:flex;gap:4px;}
+.ptab{padding:8px 16px;font-size:.84rem;font-weight:700;color:var(--tl);cursor:pointer;border-radius:8px 8px 0 0;margin-bottom:-12px;transition:all .2s;border-bottom:3px solid transparent;}
+.ptab.on{color:var(--p);border-bottom-color:var(--p);background:var(--w);}
+.kb-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#kb-q{padding:7px 11px;border:1.5px solid var(--bor);border-radius:7px;font-size:.84rem;width:200px;outline:none;transition:border .2s;background:var(--w);}
+
+/* KANBAN BOARD */
+#kbs{padding-top:5px}#cs{display:none;padding-top:5px}
+#kb{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;align-items:flex-start;min-height:55vh;}
+.kc{background:#fdfafb;border-radius:12px;flex-shrink:0;display:flex;flex-direction:column;min-width:270px;max-width:270px;box-shadow:var(--sh);border:1px solid var(--px);}
+.kch{background:var(--w);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:5px;border-bottom:1px solid var(--px);border-top:3px solid var(--p);border-radius:12px 12px 0 0;}
+.cn{font-weight:700;color:var(--pd);font-size:.9rem;flex:1}
+.cn.ed{cursor:pointer}.cn.ed:hover{text-decoration:underline dotted}
+.cm2{display:flex;align-items:center;gap:4px}
+.cb{background:var(--px);color:var(--p);border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:700}
+.ct{background:var(--pl);color:var(--pd);border-radius:20px;padding:2px 7px;font-size:.68rem;font-weight:700}
+.bc{background:transparent;border:none;color:var(--tl);border-radius:5px;padding:2px 6px;cursor:pointer;font-size:.8rem;transition:all .2s}
+.bc:hover{background:var(--px);color:var(--no);}
+.kcb{padding:10px;display:flex;flex-direction:column;gap:9px;min-height:80px;flex:1;}
+.bnc{min-width:42px;max-width:42px;height:42px;border-radius:50%;background:var(--w);border:2px dashed var(--tl);color:var(--tl);font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:flex-start;transition:all 0.2s;}
+.bnc:hover{border-color:var(--p);color:var(--p);background:var(--px);}
+
+/* CARD KANBAN */
+.kd{background:var(--w);border-radius:8px;border-left:4px solid var(--p);padding:10px;cursor:grab;box-shadow:0 2px 5px rgba(120,74,145,.06);transition:transform .15s,box-shadow .15s;position:relative}
+.kd:active{cursor:grabbing;}
+.kd.sortable-ghost { opacity: 0.4; background-color: #fdf5ff; }
+.kd:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(120,74,145,.12)}
+.kd.pg{border-left-color:var(--ok)}.kd.eg{border-left-color:#9e9e9e;opacity:.65}
+.kt{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;margin-bottom:4px}
+.kn{font-weight:700;font-size:.86rem;color:var(--text);}
+.kv{font-size:.77rem;font-weight:700;color:var(--p);white-space:nowrap}
+.kdc{font-size:.74rem;color:var(--tl);margin-bottom:8px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.4;}
+.kft{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:3px}
+.kda{font-size:.67rem;color:var(--tl)}.kda.lt{color:var(--no);font-weight:700}
+.kg{display:flex;gap:4px;flex-wrap:wrap}
+.tg2{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:6px}
+.tg2.pg{background:#e8f5e9;color:var(--ok)}.tg2.eg{background:#eee;color:#555}.tg2.pn{background:#fff3e0;color:var(--wa)}
+
+/* Overlay de Loading do Firebase */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.4s;}
+#loader.off{opacity:0;pointer-events:none;}
+
+/* Media Queries */
+@media(max-width:660px){
+  #sb{width:55px}
+  #sb:hover{width:55px;box-shadow:none;}
+  #sb .txt, #sb .sb-foot, #sb .sb-logo{padding-left:12px; padding-right:12px;}
+  #sb .txt, #sb .sb-foot{display:none !important;}
+  #main{margin-left:55px;padding:12px;width:calc(100% - 55px);}
+  .kb-top{flex-direction:column;align-items:flex-start;}
+  .kb-actions{width:100%;justify-content:space-between;}
+}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <img src="logo-personalise.png" alt="Logo Personalise" style="height: 60px; margin-bottom: 15px;" />
+  <p style="color:var(--tl); font-size: 0.9rem;">Conectando à nuvem...</p>
+</div>
+
+<div id="login-screen" style="display:none;">
+  <div class="login-box">
+    <img src="logo-personalise.png" alt="Personalise" style="height: 65px; margin-bottom: 15px;" />
+    <p>Acesso restrito do sistema</p>
+    <input type="email" id="log-email" placeholder="Seu E-mail" />
+    <input type="password" id="log-pass" placeholder="Sua Senha" />
+    <button onclick="fazerLogin()">Entrar no Sistema</button>
+    <p id="login-error">Credenciais inválidas.</p>
+  </div>
+</div>
+
+<div id="app-container">
+
+<div id="sb">
+  <div class="sb-logo">
+    <img src="logo-personalise.png" alt="Personalise" class="sidebar-logo" />
+  </div>
+  <nav>
+    <a id="n0" onclick="goTo(0)"><span class="ic">📊</span><span class="txt">Dashboard</span></a>
+    <a id="n1" onclick="goTo(1)"><span class="ic">📋</span><span class="txt">Pedidos</span></a>
+    <a id="n2" onclick="goTo(2)"><span class="ic">💰</span><span class="txt">Vendas</span></a>
+    <a id="n3" onclick="goTo(3)"><span class="ic">🛒</span><span class="txt">Compras</span></a>
+    <a id="n4" onclick="goTo(4)"><span class="ic">📦</span><span class="txt">Estoque</span></a>
+    <a id="n5" onclick="goTo(5)"><span class="ic">👥</span><span class="txt">Clientes</span></a>
+    <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
+    <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
+  </nav>
+  <div class="sb-foot">v5.1 · Cloud Segura</div>
+</div>
+
+<div id="main">
+
+<div id="p0" class="pg">
+  <h2 class="ttl">📊 Dashboard</h2>
+  <div id="alerts"></div>
+  <div class="cx-row">
+    <div class="cx g"><span class="lb">Entrou hoje</span><span class="vl" id="cxe">R$ 0,00</span><span class="sb2" id="cxeq">0 vendas</span></div>
+    <div class="cx r"><span class="lb">Saiu hoje</span><span class="vl" id="cxs">R$ 0,00</span><span class="sb2" id="cxsq">0 despesas</span></div>
+    <div class="cx b"><span class="lb">Saldo do dia</span><span class="vl" id="cxd">R$ 0,00</span><span class="sb2">resultado</span></div>
+    <div class="cx"><span class="lb">Total do mês</span><span class="vl" id="cxm">R$ 0,00</span><span class="sb2" id="cxmq">–</span></div>
+  </div>
+  <div class="cr">
+    <div class="dc g"><span class="lb">Vendas do mês</span><span class="vl" id="dv">R$ 0,00</span><span class="sb2" id="dvq">0 vendas</span></div>
+    <div class="dc r"><span class="lb">Compras do mês</span><span class="vl" id="dc">R$ 0,00</span><span class="sb2" id="dcq">0 compras</span></div>
+    <div class="dc b"><span class="lb">Lucro do mês</span><span class="vl" id="dl">R$ 0,00</span><span class="sb2" id="dls">–</span></div>
+    <div class="dc o"><span class="lb">Pedidos abertos</span><span class="vl" id="dp">0</span><span class="sb2">não entregues</span></div>
+    <div class="dc" style="border-color:var(--p)"><span class="lb">Itens estoque</span><span class="vl" id="de">0</span><span class="sb2">cadastrados</span></div>
+  </div>
+  <div class="ch-row">
+    <div class="ch"><h3>📅 Vendas vs Compras (6 meses)</h3><canvas id="ch1"></canvas></div>
+    <div class="ch"><h3>🥧 Receita por categoria</h3><canvas id="ch2"></canvas></div>
+  </div>
+  <div class="ch-row">
+    <div class="ch"><h3>📉 Fluxo de caixa (30 dias)</h3><canvas id="ch3"></canvas></div>
+    <div class="ch"><h3>📦 Pedidos por coluna</h3><canvas id="ch4"></canvas></div>
+  </div>
+</div>
+
+<div id="p1" class="pg">
+  <div class="kb-top">
+    <div class="ptabs">
+      <div class="ptab on" onclick="stab('kbs','cs',this)">🗂️ Kanban</div>
+      <div class="ptab" onclick="stab('cs','kbs',this)">✅ Concluídos</div>
+    </div>
+    <div class="kb-actions">
+      <input id="kb-q" type="text" placeholder="🔍 Buscar pedido..." oninput="filtKB()"/>
+      <button class="btn bp" onclick="OM('mnp')">➕ Novo Pedido</button>
+    </div>
+  </div>
+  
+  <div id="kbs">
+    <div id="kb"></div>
+  </div>
+  
+  <div id="cs">
+    <div class="fb">
+      <input id="fc0" type="text" placeholder="🔍 Buscar concluído..." oninput="renderConc()"/>
+    </div>
+    <div class="tc"><h3>Pedidos lançados como venda</h3>
+      <table><thead><tr><th>Data</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Ações</th></tr></thead>
+      <tbody id="tbc"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div id="p2" class="pg">
+  <h2 class="ttl">💰 Vendas</h2>
+  <div class="fc"><h3>➕ Registrar Venda</h3>
+    <div class="fg-grid">
+      <div class="fg"><label>Cliente</label><input id="vc" type="text" list="vcl"/><datalist id="vcl"></datalist></div>
+      <div class="fg"><label>Produto/Serviço *</label><input id="vp" type="text" placeholder="Ex: Camiseta preta com logo"/></div>
+      <div class="fg"><label>Categoria</label><select id="vcat"><option>Camisetas</option><option>Canecas</option><option>Agendas</option><option>Cadernos</option><option>Etiquetas</option><option>Outros</option></select></div>
+      <div class="fg"><label>Qtd</label><input id="vq" type="number" min="1" value="1" oninput="calcV()"/></div>
+      <div class="fg"><label>Valor unit. (R$)</label><input id="vu" type="number" min="0" step="0.01" placeholder="0,00" oninput="calcV()"/></div>
+      <div class="fg"><label>Total (R$)</label><input id="vt" type="number" min="0" step="0.01" placeholder="0,00"/></div>
+      <div class="fg"><label>Pagamento</label><select id="vpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Fiado</option></select></div>
+      <div class="fg"><label>Data</label><input id="vd" type="date"/></div>
+      <div class="fg fl"><label>Obs</label><input id="vo" type="text" placeholder="Observações"/></div>
+    </div>
+    <div class="fa">
+      <button class="btn bp" onclick="salvarV()">💾 Salvar</button>
+      <button class="btn" style="background:#eee" onclick="limV()">🧹 Limpar</button>
+    </div>
+  </div>
+  <div class="fb"><input id="fvb" type="text" placeholder="🔍 Buscar..." oninput="renderV()"/></div>
+  <div class="tc"><h3>Histórico de Vendas</h3>
+    <table><thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Cat.</th><th>Qtd</th><th>Total</th><th>Pgto</th><th>Ações</th></tr></thead>
+    <tbody id="tbv"></tbody></table>
+  </div>
+</div>
+
+<div id="p3" class="pg">
+  <h2 class="ttl">🛒 Compras / Despesas</h2>
+  <div class="fc"><h3>➕ Registrar Compra</h3>
+    <div class="fg-grid">
+      <div class="fg"><label>Fornecedor/Descrição *</label><input id="cf" type="text" placeholder="Ex: Fornecedor de canecas em branco"/></div>
+      <div class="fg"><label>Categoria</label><select id="ccat"><option>Matéria-prima</option><option>Equipamento</option><option>Embalagem</option><option>Serviço</option><option>Aluguel</option><option>Conta</option><option>Outros</option></select></div>
+      <div class="fg"><label>Valor (R$) *</label><input id="cv" type="number" min="0" step="0.01" placeholder="0,00"/></div>
+      <div class="fg"><label>Pagamento</label><select id="cpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Boleto</option><option>A prazo</option></select></div>
+      <div class="fg"><label>Data</label><input id="cd" type="date"/></div>
+      <div class="fg fl"><label>Obs</label><input id="co" type="text" placeholder="Observações"/></div>
+    </div>
+    <div class="fa">
+      <button class="btn bp" onclick="salvarC()">💾 Salvar</button>
+      <button class="btn" style="background:#eee" onclick="limC()">🧹 Limpar</button>
+    </div>
+  </div>
+  <div class="fb"><input id="fcb" type="text" placeholder="🔍 Buscar..." oninput="renderC()"/></div>
+  <div class="tc"><h3>Histórico de Compras</h3>
+    <table><thead><tr><th>Data</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Pgto</th><th>Ações</th></tr></thead>
+    <tbody id="tbc2"></tbody></table>
+  </div>
+</div>
+
+<div id="p4" class="pg">
+  <h2 class="ttl">📦 Estoque</h2>
+  <div class="fc"><h3>➕ Cadastrar Produto/Insumo</h3>
+    <div class="fg-grid">
+      <div class="fg"><label>Nome *</label><input id="en" type="text" placeholder="Ex: Caneca Branca AAA"/></div>
+      <div class="fg"><label>Categoria</label><select id="ecat"><option>Matéria-prima</option><option>Camisetas</option><option>Canecas</option><option>Agendas</option><option>Outros</option></select></div>
+      <div class="fg"><label>Quantidade</label><input id="eq" type="number" min="0" value="0"/></div>
+      <div class="fg"><label>Qtd. mínima</label><input id="em" type="number" min="0" value="5"/></div>
+      <div class="fg"><label>Custo unit. (R$)</label><input id="ec" type="number" min="0" step="0.01" placeholder="0,00"/></div>
+      <div class="fg"><label>Preço venda (R$)</label><input id="ep2" type="number" min="0" step="0.01" placeholder="0,00"/></div>
+    </div>
+    <div class="fa">
+      <button class="btn bp" onclick="salvarE()">💾 Salvar</button>
+      <button class="btn" style="background:#eee" onclick="limE()">🧹 Limpar</button>
+    </div>
+  </div>
+  <div class="fb"><input id="feb" type="text" placeholder="🔍 Buscar..." oninput="renderE()"/></div>
+  <div class="tc"><h3>Itens Cadastrados</h3>
+    <table><thead><tr><th>Produto</th><th>Categoria</th><th>Qtd</th><th>Mín.</th><th>Custo</th><th>Preço</th><th>Ações</th></tr></thead>
+    <tbody id="tbe"></tbody></table>
+  </div>
+</div>
+
+<div id="p5" class="pg">
+  <h2 class="ttl">👥 Clientes</h2>
+  <div class="fc"><h3>➕ Cadastrar Cliente</h3>
+    <div class="fg-grid">
+      <div class="fg"><label>Nome *</label><input id="cln" type="text" placeholder="Nome completo"/></div>
+      <div class="fg"><label>WhatsApp</label><input id="clt" type="text" placeholder="(67) 9????-????"/></div>
+      <div class="fg"><label>E-mail</label><input id="cle" type="email" placeholder="email@exemplo.com"/></div>
+      <div class="fg"><label>Cidade</label><input id="clc" type="text" placeholder="Ex: Mineiros"/></div>
+      <div class="fg fl"><label>Obs</label><input id="clo" type="text" placeholder="Observações"/></div>
+    </div>
+    <div class="fa">
+      <button class="btn bp" onclick="salvarCl()">💾 Salvar</button>
+      <button class="btn" style="background:#eee" onclick="limCl()">🧹 Limpar</button>
+    </div>
+  </div>
+  <div class="fb"><input id="fclb" type="text" placeholder="🔍 Buscar por nome ou celular..." oninput="renderCl()"/></div>
+  <div class="tc"><h3>Clientes Cadastrados</h3>
+    <table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Ações</th></tr></thead>
+    <tbody id="tbcl"></tbody></table>
+  </div>
+</div>
+
+<div id="p6" class="pg">
+  <h2 class="ttl">📈 Relatórios</h2>
+  <div class="fb">
+    <label style="font-weight:700;color:var(--p)">Período:</label>
+    <input id="rde" type="date"/><input id="rat" type="date"/>
+    <button class="btn bp" onclick="gerarR()">🔍 Gerar</button>
+  </div>
+  <div class="cr">
+    <div class="dc g"><span class="lb">Total Vendas</span><span class="vl" id="rrv">R$ 0,00</span></div>
+    <div class="dc r"><span class="lb">Total Compras</span><span class="vl" id="rrc">R$ 0,00</span></div>
+    <div class="dc b"><span class="lb">Lucro Líquido</span><span class="vl" id="rrl">R$ 0,00</span></div>
+  </div>
+  <div class="tc"><h3>Resumo no período</h3>
+    <table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Valor</th></tr></thead>
+    <tbody id="tbrv"></tbody></table>
+  </div>
+</div>
+
+</div></div><div id="toast"></div>
+
+<div class="mo" id="mnp">
+  <div class="mb">
+    <div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div>
+    <div class="my">
+      <div class="fg-grid" style="gap:9px">
+        <div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome do cliente" list="ifcl" autocomplete="off"/><datalist id="ifcl"></datalist></div>
+        <div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas de cerâmica..."></textarea></div>
+        <div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" min="0" step="0.01"/></div>
+        <div class="fg"><label>Sinal (R$)</label><input id="ifs" type="number" min="0" step="0.01"/></div>
+        <div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="DDD + Número"/></div>
+        <div class="fg"><label>Data de Entrega</label><input id="ife" type="date"/></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button>
+      <button class="btn bp sm" onclick="addCard()">➕ Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="mped">
+  <div class="mb">
+    <div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div>
+    <div class="my">
+      <div class="ib" id="mpif"></div>
+      <div class="fr">
+        <div class="fi"><label>Total</label><p style="color:var(--in)" id="mptot">–</p></div>
+        <div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div>
+        <div class="fi"><label>Restante</label><p id="mprest">–</p></div>
+      </div>
+      <div class="tr2">
+        <div><div class="tl2">💳 Pagamento recebido</div><div class="ts">Marque quando o cliente pagar</div></div>
+        <label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label>
+      </div>
+      <div class="tr2">
+        <div><div class="tl2">📦 Pedido entregue</div><div class="ts">Marque quando entregar</div></div>
+        <label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button>
+      <button class="btn out sm" onclick="editPA()">✏️ Editar</button>
+      <button class="btn bs sm" onclick="abrirLV()">💰 Lançar Venda</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="mhc">
+  <div class="mb" style="max-width:600px">
+    <div class="mh"><h3 id="mhctt">👁️ Histórico: Cliente</h3><button class="mc" onclick="CM('mhc')">✕</button></div>
+    <div class="my" style="padding:10px 0;">
+      <div class="tc" style="box-shadow:none; padding:0; margin:0;">
+        <table><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody id="tbhc"></tbody></table>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="mlv">
+  <div class="mb" style="max-width:430px">
+    <div class="mh" style="color:var(--ok)"><h3>💰 Lançar como Venda</h3><button class="mc" onclick="CM('mlv')">✕</button></div>
+    <div class="my">
+      <p style="font-size:.82rem;margin-bottom:12px;color:var(--tl)">O card será arquivado em <strong>Concluídos</strong>.</p>
+      <div class="fg-grid" style="gap:9px">
+        <div class="fg fl"><label>Produto/Serviço *</label><input id="lvp" type="text"/></div>
+        <div class="fg"><label>Categoria</label><select id="lvcat"><option>Camisetas</option><option>Canecas</option><option>Agendas</option><option>Cadernos</option><option>Etiquetas</option><option>Outros</option></select></div>
+        <div class="fg"><label>Valor total (R$)</label><input id="lvt" type="number" min="0" step="0.01"/></div>
+        <div class="fg"><label>Pagamento</label><select id="lvpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Fiado</option></select></div>
+        <div class="fg"><label>Data</label><input id="lvd" type="date"/></div>
+        <div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="togQE()"><option value="">— Não abater —</option></select></div>
+        <div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button>
+      <button class="btn bs sm" onclick="confLV()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="mep">
+  <div class="mb">
+    <div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div>
+    <div class="my">
+      <div class="fg-grid" style="gap:9px">
+        <div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div>
+        <div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div>
+        <div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div>
+        <div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" min="0" step="0.01"/></div>
+        <div class="fg"><label>Sinal (R$)</label><input id="eps" type="number" min="0" step="0.01"/></div>
+        <div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button>
+      <button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="mnc"><div class="sm-box"><h3>➕ Nova Coluna</h3><input id="ncn" type="text" placeholder="Ex: Em Produção..." maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mnc')">Cancelar</button><button class="btn bp sm" onclick="criarCol()">✅ Criar</button></div></div></div>
+<div class="mo" id="mrc"><div class="sm-box"><h3>✏️ Renomear Coluna</h3><input id="rcn" type="text" maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mrc')">Cancelar</button><button class="btn bp sm" onclick="renCol()">✅ Salvar</button></div></div></div>
+<div class="mo" id="mcf"><div class="sm-box"><h3>⚠️ Confirmar</h3><p id="cfm">Deseja continuar?</p><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mcf')">Cancelar</button><button class="btn bd sm" id="cfo">Confirmar</button></div></div></div>
+
+<script>
+// ── 1. CONFIGURAÇÃO DO FIREBASE ──
+const firebaseConfig = {
+  apiKey: "AIzaSyCptK3O6T0n6MRI7uWz4VVwb6Z_fLwchXA",
+  authDomain: "sistema-personalise.firebaseapp.com",
+  projectId: "sistema-personalise",
+  storageBucket: "sistema-personalise.firebasestorage.app",
+  messagingSenderId: "31043124590",
+  appId: "1:31043124590:web:4f6f08ca610f3a147b557f"
+};
+firebase.initializeApp(firebaseConfig);
+const fbDB = firebase.firestore();
+const auth = firebase.auth(); // Controle de Login
+
+// ── 2. LÓGICA DE LOGIN E AUTENTICAÇÃO ──
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-container').style.display = 'block';
+    iniciarApp();
+  } else {
+    document.getElementById('loader').classList.add('off');
+    document.getElementById('app-container').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+});
+
+function fazerLogin() {
+  const email = document.getElementById('log-email').value;
+  const pass = document.getElementById('log-pass').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+  
+  if(!email || !pass) { err.textContent = "Preencha e-mail e senha."; err.style.display = 'block'; return; }
+  
+  auth.signInWithEmailAndPassword(email, pass).catch(error => {
+    err.textContent = "Erro: E-mail ou senha incorretos.";
+    err.style.display = 'block';
+    console.error(error);
+  });
+}
+
+function fazerLogout() {
+  auth.signOut();
+}
+
+// ── 3. ESTRUTURA DE DADOS NA MEMÓRIA E SINCRONIZAÇÃO ──
+const K = {p:'ps5_ped',co:'ps5_conc',col:'ps5_col',v:'ps5_vnd',c:'ps5_cmp',e:'ps5_est',cl:'ps5_cli'};
+let MEM = { [K.p]:[], [K.co]:[], [K.col]:[], [K.v]:[], [K.c]:[], [K.e]:[], [K.cl]:[] };
+
+const DB = {
+  get: k => MEM[k] || [],
+  set: (k, v) => {
+    MEM[k] = v;
+    if(auth.currentUser) {
+      fbDB.collection('loja').doc('dados_personalise').set(MEM).catch(e => {
+          console.error("Erro ao salvar na nuvem:", e);
+          toast("Aviso: Falha de permissão ao salvar.", true);
+      });
+    }
+  }
+};
+
+function getCols(){
+  const c = DB.get(K.col);
+  if(c && c.length) return c;
+  const d = [{id:'c0',nome:'Novo Pedido',fixa:true}, {id:'c1',nome:'Em Produção',fixa:false}];
+  DB.set(K.col, d);
+  return d;
+}
+
+// ── 4. CARREGAR DADOS APÓS O LOGIN ──
+async function iniciarApp() {
+  document.getElementById('loader').classList.remove('off'); 
+  try {
+    const docRef = fbDB.collection('loja').doc('dados_personalise');
+    const docSnap = await docRef.get();
+    
+    if(docSnap.exists) {
+        MEM = docSnap.data();
+    } else {
+        MEM[K.col] = [{id:'c0',nome:'Novo Pedido',fixa:true}, {id:'c1',nome:'Em Produção',fixa:false}];
+        await docRef.set(MEM);
+    }
+    
+    document.getElementById('loader').classList.add('off');
+    goTo(1); 
+    toast("✅ Bem-vindo à Personalise Cloud!");
+
+  } catch (erro) {
+    console.error("Erro no Firebase:", erro);
+    document.getElementById('loader').innerHTML = `<h2 style="color:var(--no)">⚠️ Erro</h2><p>Sem permissão ou erro de conexão.</p>`;
+  }
+}
+
+// ── UTILS ──
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
+const brl=v=>'R$ '+Number(v||0).toFixed(2).replace('.',',');
+const hj = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const agora=()=>new Date().toLocaleString('pt-BR');
+function fd(d){if(!d)return'–';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;}
+function isL(d){return d&&d<hj();}
+function isT(d){return d===hj();}
+function isTm(d){const t=new Date();t.setDate(t.getDate()+1);return d===t.toISOString().slice(0,10);}
+function gv(id){const e=document.getElementById(id);return e?e.value:'';}
+function sv(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function toast(m,e=false){const t=document.getElementById('toast');t.textContent=m;t.style.background=e?'#c62828':'#5a3570';t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2700);}
+function CM(id){document.getElementById(id).classList.remove('on');}
+function OM(id){document.getElementById(id).classList.add('on');}
+function conf(m,cb){document.getElementById('cfm').textContent=m;OM('mcf');document.getElementById('cfo').onclick=()=>{cb();CM('mcf');};}
+function updDL(){const cls=DB.get(K.cl);['vcl','ifcl'].forEach(id=>{const d=document.getElementById(id);if(d)d.innerHTML=cls.map(c=>`<option value="${c.nome}">`).join('');});}
+
+document.querySelectorAll('.mo').forEach(m => { m.addEventListener('click', (e) => { if(e.target === m) CM(m.id); }); });
+document.getElementById('vd').value = hj();
+document.getElementById('cd').value = hj();
+
+// ── NAVEGAÇÃO ──
+function goTo(n){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('on'));
+  document.getElementById('p'+n).classList.add('on');
+  document.getElementById('n'+n).classList.add('on');
+  const fx=[buildDash,()=>{renderKB();updDL();},()=>{renderV();updDL();},renderC,renderE,renderCl,()=>{setRDates();gerarR();}];
+  if(fx[n])fx[n]();
+}
+
+// ── ALERTAS E CAIXA ──
+function buildAlerts(){
+  const bar=document.getElementById('alerts');bar.innerHTML='';
+  const ps=DB.get(K.p)||[];
+  const at=ps.filter(p=>!p.entregue&&isL(p.entrega));
+  const hj2=ps.filter(p=>!p.entregue&&isT(p.entrega));
+  const pp=ps.filter(p=>!p.pago&&Number(p.valor||0)>0);
+  const add=(tp,ic,msg)=>{const d=document.createElement('div');d.className=`al ${tp}`;d.innerHTML=`<span>${ic}</span><span>${msg}</span>`;d.onclick=()=>goTo(1);bar.appendChild(d);};
+  if(at.length)add('da','🚨',`${at.length} pedido(s) ATRASADO(S)`);
+  if(hj2.length)add('wa','📅',`${hj2.length} entrega(s) para HOJE`);
+  if(pp.length)add('in','💳',`${pp.length} pedido(s) aguardando pagamento`);
+}
+function buildCaixa(){
+  const d=hj(),mes=d.slice(0,7);
+  const vs=DB.get(K.v)||[],cs=DB.get(K.c)||[];
+  const vH=vs.filter(v=>v.data===d),cH=cs.filter(c=>c.data===d);
+  const ent=vH.reduce((a,v)=>a+Number(v.total||0),0),sai=cH.reduce((a,c)=>a+Number(c.valor||0),0),sal=ent-sai;
+  const vM=vs.filter(v=>v.data.startsWith(mes)),totM=vM.reduce((a,v)=>a+Number(v.total||0),0);
+  sv('cxe',brl(ent));sv('cxeq',vH.length+' vendas');sv('cxs',brl(sai));sv('cxsq',cH.length+' despesas');
+  const se=document.getElementById('cxd');if(se){se.textContent=brl(sal);se.style.color=sal>=0?'var(--ok)':'var(--no)';}
+  sv('cxm',brl(totM));sv('cxmq',vM.length+' vendas no mês');
+}
+
+// ── DASHBOARD ──
+let CHS={};
+function buildDash(){
+  buildAlerts();buildCaixa();
+  const now=new Date(),mes=now.toISOString().slice(0,7);
+  const vs=DB.get(K.v)||[],cs=DB.get(K.c)||[],ps=DB.get(K.p)||[],es=DB.get(K.e)||[];
+  const vM=vs.filter(v=>v.data.startsWith(mes)),cM=cs.filter(c=>c.data.startsWith(mes));
+  const tv=vM.reduce((a,v)=>a+Number(v.total||0),0),tc=cM.reduce((a,c)=>a+Number(c.valor||0),0),luc=tv-tc;
+  sv('dv',brl(tv));sv('dvq',vM.length+' vendas');sv('dc',brl(tc));sv('dcq',cM.length+' compras');
+  const dl=document.getElementById('dl');if(dl){dl.textContent=brl(luc);dl.style.color=luc>=0?'var(--ok)':'var(--no)';}
+  sv('dp',ps.filter(p=>!p.entregue).length);sv('de',es.length);
+  
+  const ms=[],lbM=[];
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);ms.push(d.toISOString().slice(0,7));lbM.push(d.toLocaleDateString('pt-BR',{month:'short'}));}
+  mkC('ch1','bar',lbM,[{label:'Vendas',data:ms.map(m=>vs.filter(v=>v.data.startsWith(m)).reduce((a,v)=>a+Number(v.total||0),0)),backgroundColor:'#784A91',borderRadius:4},{label:'Compras',data:ms.map(m=>cs.filter(c=>c.data.startsWith(m)).reduce((a,c)=>a+Number(c.valor||0),0)),backgroundColor:'#c62828',borderRadius:4}]);
+  
+  const cats={};vs.forEach(v=>{const c=v.categoria||'Outros';cats[c]=(cats[c]||0)+Number(v.total||0);});
+  mkC('ch2','pie',Object.keys(cats),[{data:Object.values(cats),backgroundColor:['#784A91','#9b6bb5','#b892cc','#5a3570','#c9a0e0','#3f51b5']}]);
+}
+function mkC(id,type,labels,datasets){
+  if(CHS[id])CHS[id].destroy();
+  const cv=document.getElementById(id);if(!cv)return;
+  CHS[id]=new Chart(cv.getContext('2d'),{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false}});
+}
+
+// ── TABS E CONCLUÍDOS ──
+function stab(show,hide,el){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  document.getElementById(show).style.display='block';document.getElementById(hide).style.display='none';
+  if(show==='cs')renderConc();
+}
+function renderConc(){
+  const b=gv('fc0').toLowerCase();
+  const d=(DB.get(K.co)||[]).filter(c=>!b||c.cliente.toLowerCase().includes(b));
+  document.getElementById('tbc').innerHTML=d.length?d.map(c=>`<tr><td>${fd(c.dataConc)}</td><td><strong>${c.cliente}</strong></td><td>${(c.desc||'').slice(0,55)}</td><td style="color:var(--ok);font-weight:700">${brl(c.valor)}</td><td><button class="btn bd sm" onclick="delConc('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:16px;color:#bbb">Nenhum pedido concluído</td></tr>';
+}
+function delConc(id){conf('Excluir este registro?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
+
+// ── KANBAN COMPLETO ──
+let actPed=null,edColId=null,kbQ='';
+function filtKB(){kbQ=gv('kb-q').toLowerCase().trim();renderKB();}
+
+function renderKB(){
+  const board=document.getElementById('kb');const cols=getCols();const ps=DB.get(K.p)||[];board.innerHTML='';
+  cols.forEach((col)=>{
+    const cards=ps.filter(p=>(p.colId||cols[0].id)===col.id);
+    const tot=cards.reduce((a,p)=>a+Number(p.valor||0),0);
+    const ce=document.createElement('div');ce.className='kc';
+    const hdr=document.createElement('div');hdr.className='kch';
+    hdr.innerHTML=`<span class="cn${!col.fixa?' ed':''}" ${!col.fixa?`ondblclick="abrRnc('${col.id}')"`:''}>${col.nome}</span><div class="cm2"><span class="cb">${cards.length}</span>${tot>0?`<span class="ct">${brl(tot)}</span>`:''} ${!col.fixa?`<button class="bc" onclick="delCol('${col.id}')">✕</button>`:''}</div>`;
+    ce.appendChild(hdr);
+    
+    const body=document.createElement('div');body.className='kcb';
+    body.dataset.colId = col.id; 
+
+    cards.forEach(p=>{
+      const el=document.createElement('div');
+      el.className=`kd ${p.entregue?'eg':''} ${p.pago?'pg':''}`;
+      el.dataset.id = p.id;
+      const rest=Number(p.valor||0)-Number(p.sinal||0);
+      
+      el.innerHTML=`<div class="kt"><span class="kn">${p.cliente}</span><span class="kv">${brl(p.valor)}</span></div><div class="kdc">${p.desc}</div><div class="kft"><span class="kda">${p.entrega?'📅 '+fd(p.entrega):''}</span><div class="kg">${p.pago?'<span class="tg2 pg">✅ Pago</span>':(rest>0?`<span class="tg2 pn">💳 ${brl(rest)}</span>`:'')}</div></div>`;
+      el.addEventListener('click',()=>abrModal(p.id));
+      body.appendChild(el);
+    });
+    ce.appendChild(body);board.appendChild(ce);
+  });
+  const btn=document.createElement('button');btn.className='bnc';btn.innerHTML='+';btn.onclick=()=>{document.getElementById('ncn').value='';OM('mnc');};board.appendChild(btn);
+
+  document.querySelectorAll('.kcb').forEach(el => {
+    new Sortable(el, {
+      group: 'kanban',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      onEnd: function (evt) {
+        const toColId = evt.to.dataset.colId;
+        const pId = evt.item.dataset.id;
+        const ps = DB.get(K.p);
+        const i = ps.findIndex(p => p.id === pId);
+        if(i !== -1 && ps[i].colId !== toColId) {
+          ps[i].colId = toColId;
+          DB.set(K.p, ps);
+          setTimeout(buildDash, 100); 
+        }
+      },
+    });
+  });
+}
+
+function addCard(){
+  const cli=gv('ifc').trim(),desc=gv('ifd').trim(),tel=gv('ift').trim();
+  if(!cli||!desc){toast('Preencha cliente e descrição!',true);return;}
+  const cols=getCols();const ps=DB.get(K.p)||[];
+  ps.unshift({id:uid(),colId:cols[0].id,cliente:cli,desc,valor:Number(gv('ifv')||0),sinal:Number(gv('ifs')||0),tel:tel,entrega:gv('ife'),data:hj(),pago:false,entregue:false});
+  DB.set(K.p,ps);
+  
+  // AUTO-SAVE EM CLIENTES
+  const cls=DB.get(K.cl)||[];
+  if(!cls.some(c=>c.nome.toLowerCase()===cli.toLowerCase())){
+    cls.unshift({id:uid(),nome:cli,tel:tel,cidade:''});
+    DB.set(K.cl,cls);
+    updDL();
+    if(document.getElementById('p5').classList.contains('on')) renderCl();
+  }
+
+  document.getElementById('ifc').value='';document.getElementById('ifd').value='';document.getElementById('ifv').value='';document.getElementById('ifs').value='';document.getElementById('ift').value='';document.getElementById('ife').value='';
+  CM('mnp');renderKB();toast('✅ Pedido adicionado!');
+}
+
+function abrModal(id){
+  actPed=id;const p=DB.get(K.p).find(x=>x.id===id);if(!p)return;
+  document.getElementById('mptt').textContent=`📋 Pedido`;
+  
+  let numLimpo = p.tel ? p.tel.replace(/\D/g, '') : '';
+  let btnWhats = '';
+  if (numLimpo.length >= 10) { 
+     btnWhats = `<a href="https://wa.me/55${numLimpo}" target="_blank" style="display:inline-flex; align-items:center; gap:5px; background:#25D366; color:#fff; text-decoration:none; padding:3px 10px; border-radius:12px; font-size:.75rem; font-weight:700; margin-left:10px;"><span style="font-size:.9rem">💬</span> WhatsApp</a>`;
+  }
+
+  document.getElementById('mpif').innerHTML=`<div style="font-size:1.05rem;font-weight:700;color:var(--pd);margin-bottom:6px;display:flex;align-items:center;">${p.cliente} ${btnWhats}</div><strong>Descrição:</strong> ${p.desc}`;
+  sv('mptot',brl(p.valor));sv('mpsin',brl(p.sinal));sv('mprest',brl(Number(p.valor)-Number(p.sinal)));
+  document.getElementById('mppg').checked=!!p.pago;document.getElementById('mpeg').checked=!!p.entregue;
+  OM('mped');
+}
+function togF(flag){
+  if(!actPed)return;const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;
+  ps[i][flag]=document.getElementById(flag==='pago'?'mppg':'mpeg').checked;
+  DB.set(K.p,ps);abrModal(actPed);renderKB();toast('Atualizado!');
+}
+function delPA(){CM('mped');conf('Excluir pedido?',()=>{DB.set(K.p,DB.get(K.p).filter(p=>p.id!==actPed));renderKB();toast('Excluído!');});}
+function editPA(){
+  const p=DB.get(K.p).find(x=>x.id===actPed);if(!p)return;
+  document.getElementById('epc').value=p.cliente;document.getElementById('ept').value=p.tel||'';document.getElementById('epe').value=p.entrega||'';document.getElementById('epv').value=p.valor;document.getElementById('eps').value=p.sinal;document.getElementById('epd').value=p.desc;
+  CM('mped');OM('mep');
+}
+function salvarEd(){
+  const cli=gv('epc').trim(),desc=gv('epd').trim();if(!cli||!desc){toast('Preencha campos!',true);return;}
+  const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;
+  ps[i]={...ps[i],cliente:cli,tel:gv('ept').trim(),entrega:gv('epe'),valor:Number(gv('epv')||0),sinal:Number(gv('eps')||0),desc};
+  DB.set(K.p,ps);CM('mep');renderKB();toast('Atualizado!');
+}
+
+function criarCol(){const n=gv('ncn').trim();if(n){const c=getCols();c.push({id:'c'+uid(),nome:n,fixa:false});DB.set(K.col,c);CM('mnc');renderKB();}}
+function abrRnc(id){edColId=id;const col=getCols().find(c=>c.id===id);document.getElementById('rcn').value=col?col.nome:'';OM('mrc');}
+function renCol(){const n=gv('rcn').trim();if(n&&edColId){const c=getCols();const i=c.findIndex(x=>x.id===edColId);if(i!==-1)c[i].nome=n;DB.set(K.col,c);CM('mrc');renderKB();}}
+function delCol(id){if(DB.get(K.p).some(p=>(p.colId||getCols()[0].id)===id)){toast('Mova os pedidos antes!',true);return;}conf('Excluir?',()=>{DB.set(K.col,getCols().filter(c=>c.id!==id));renderKB();});}
+
+// Lançar como Venda
+function popEstSel(){const sel=document.getElementById('lvest');if(!sel)return;sel.innerHTML=`<option value="">— Não abater —</option>`+(DB.get(K.e)||[]).map(e=>`<option value="${e.id}">${e.nome}</option>`).join('');}
+function abrirLV(){
+  const p=DB.get(K.p).find(x=>x.id===actPed);if(!p)return;
+  document.getElementById('lvp').value=p.desc;document.getElementById('lvt').value=p.valor;document.getElementById('lvd').value=hj();
+  popEstSel();CM('mped');OM('mlv');
+}
+function confLV(){
+  const prod=gv('lvp').trim();if(!prod)return;
+  const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;const ped=ps[i];
+  
+  const vs=DB.get(K.v)||[];vs.unshift({id:uid(),cliente:ped.cliente,produto:prod,categoria:gv('lvcat'),qtd:1,total:Number(gv('lvt')||0),pgto:gv('lvpg'),data:gv('lvd')||hj()});DB.set(K.v,vs);
+  
+  const estId=gv('lvest');if(estId){const es=DB.get(K.e);const ei=es.findIndex(e=>e.id===estId);if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-Number(gv('lvq')||1));DB.set(K.e,es);}}
+  
+  const co=DB.get(K.co)||[];co.unshift({id:uid(),cliente:ped.cliente,desc:ped.desc,valor:ped.valor,dataConc:hj()});DB.set(K.co,co);
+  ps.splice(i,1);DB.set(K.p,ps);CM('mlv');renderKB();toast('✅ Lançado como Venda!');
+}
+
+// ── VENDAS COMPLETO ──
+let evid=null;
+function calcV(){document.getElementById('vt').value=(Number(gv('vu')||0)*Number(gv('vq')||1)).toFixed(2);}
+function salvarV(){
+  const p=gv('vp').trim();if(!p){toast('Preencha o produto!',true);return;}
+  const vs=DB.get(K.v)||[];const id=evid||uid();
+  const o={id,cliente:gv('vc').trim(),produto:p,categoria:gv('vcat'),qtd:Number(gv('vq')||1),total:Number(gv('vt')||0),pgto:gv('vpg'),data:gv('vd')||hj()};
+  if(evid){vs[vs.findIndex(v=>v.id===id)]=o;evid=null;}else vs.unshift(o);
+  DB.set(K.v,vs); limV(); renderV(); toast('✅ Venda salva!');
+}
+function limV(){document.getElementById('vp').value='';document.getElementById('vt').value='';document.getElementById('vc').value='';evid=null;}
+function renderV(){
+  const b=gv('fvb').toLowerCase();
+  const d=(DB.get(K.v)||[]).filter(v=>!b||v.cliente.toLowerCase().includes(b)||v.produto.toLowerCase().includes(b));
+  document.getElementById('tbv').innerHTML=d.length?d.map(v=>`<tr><td>${fd(v.data)}</td><td>${v.cliente}</td><td>${v.produto}</td><td>${v.categoria}</td><td>${v.qtd}</td><td style="color:var(--ok);font-weight:700">${brl(v.total)}</td><td>${v.pgto}</td><td><button class="btn bd sm" onclick="delV('${v.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#bbb">Nenhuma venda encontrada</td></tr>';
+}
+function delV(id){conf('Excluir venda?',()=>{DB.set(K.v,DB.get(K.v).filter(x=>x.id!==id));renderV();});}
+
+// ── COMPRAS COMPLETO ──
+let ecid=null;
+function salvarC(){
+  const f=gv('cf').trim();if(!f){toast('Preencha o fornecedor!',true);return;}
+  const cs=DB.get(K.c)||[];const id=ecid||uid();
+  const o={id,fornecedor:f,categoria:gv('ccat'),valor:Number(gv('cv')||0),pgto:gv('cpg'),data:gv('cd')||hj()};
+  if(ecid){cs[cs.findIndex(c=>c.id===id)]=o;ecid=null;}else cs.unshift(o);
+  DB.set(K.c,cs); limC(); renderC(); toast('✅ Compra salva!');
+}
+function limC(){document.getElementById('cf').value='';document.getElementById('cv').value='';ecid=null;}
+function renderC(){
+  const b=gv('fcb').toLowerCase();
+  const d=(DB.get(K.c)||[]).filter(c=>!b||c.fornecedor.toLowerCase().includes(b));
+  document.getElementById('tbc2').innerHTML=d.length?d.map(c=>`<tr><td>${fd(c.data)}</td><td>${c.fornecedor}</td><td>${c.categoria}</td><td style="color:var(--no);font-weight:700">${brl(c.valor)}</td><td>${c.pgto}</td><td><button class="btn bd sm" onclick="delC('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#bbb">Nenhuma compra encontrada</td></tr>';
+}
+function delC(id){conf('Excluir compra?',()=>{DB.set(K.c,DB.get(K.c).filter(x=>x.id!==id));renderC();});}
+
+// ── ESTOQUE COMPLETO ──
+let eeid=null;
+function salvarE(){
+  const n=gv('en').trim();if(!n){toast('Preencha o nome!',true);return;}
+  const es=DB.get(K.e)||[];const id=eeid||uid();
+  const o={id,nome:n,categoria:gv('ecat'),qtd:Number(gv('eq')||0),min:Number(gv('em')||0),custo:Number(gv('ec')||0),preco:Number(gv('ep2')||0)};
+  if(eeid){es[es.findIndex(e=>e.id===id)]=o;eeid=null;}else es.unshift(o);
+  DB.set(K.e,es); limE(); renderE(); toast('✅ Item salvo no estoque!');
+}
+function limE(){document.getElementById('en').value='';document.getElementById('eq').value='0';document.getElementById('ec').value='';document.getElementById('ep2').value='';eeid=null;}
+function renderE(){
+  const b=gv('feb').toLowerCase();
+  const d=(DB.get(K.e)||[]).filter(e=>!b||e.nome.toLowerCase().includes(b));
+  document.getElementById('tbe').innerHTML=d.length?d.map(e=>`<tr><td><strong>${e.nome}</strong></td><td>${e.categoria}</td><td style="${e.qtd<=e.min?'color:var(--no);font-weight:700':''}">${e.qtd}</td><td>${e.min}</td><td>${brl(e.custo)}</td><td>${brl(e.preco)}</td><td><button class="btn bd sm" onclick="delE('${e.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#bbb">Nenhum item encontrado</td></tr>';
+}
+function delE(id){conf('Excluir item?',()=>{DB.set(K.e,DB.get(K.e).filter(x=>x.id!==id));renderE();});}
+
+// ── CLIENTES E HISTÓRICO ──
+let eclid=null;
+function salvarCl(){
+  const n=gv('cln').trim();if(!n){toast('Preencha o nome!',true);return;}
+  const cls=DB.get(K.cl)||[];const id=eclid||uid();
+  const o={id,nome:n,tel:gv('clt').trim(),cidade:gv('clc').trim()};
+  if(eclid){cls[cls.findIndex(c=>c.id===id)]=o;eclid=null;}else cls.unshift(o);
+  DB.set(K.cl,cls); limCl(); renderCl(); toast('✅ Cliente salvo!');
+}
+function limCl(){document.getElementById('cln').value='';document.getElementById('clt').value='';document.getElementById('clc').value='';eclid=null;}
+function renderCl(){
+  const b=gv('fclb').toLowerCase();
+  const d=(DB.get(K.cl)||[]).filter(c=>!b||c.nome.toLowerCase().includes(b)||(c.tel&&c.tel.includes(b)));
+  document.getElementById('tbcl').innerHTML=d.length?d.map(c=>`<tr><td><strong>${c.nome}</strong></td><td>${c.tel||'-'}</td><td>${c.cidade||'-'}</td><td><button class="btn bp sm" onclick="verHist('${c.nome}')">👁️ Histórico</button> <button class="btn bd sm" onclick="delCl('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#bbb">Nenhum cliente encontrado</td></tr>';
+}
+function delCl(id){conf('Excluir cliente?',()=>{DB.set(K.cl,DB.get(K.cl).filter(x=>x.id!==id));renderCl();});}
+
+function verHist(nome){
+  document.getElementById('mhctt').textContent=`👁️ Histórico: ${nome}`;
+  const ps = (DB.get(K.p)||[]).filter(p=>p.cliente===nome).map(p=>({...p, status:'Em Aberto'}));
+  const co = (DB.get(K.co)||[]).filter(c=>c.cliente===nome).map(c=>({...c, status:'Concluído', data:c.dataConc}));
+  const hist = [...ps,...co].sort((a,b)=>b.data.localeCompare(a.data));
+
+  document.getElementById('tbhc').innerHTML = hist.length ? hist.map(h=>`<tr><td>${fd(h.data)}</td><td>${(h.desc||'').slice(0,40)}...</td><td style="font-weight:700">${brl(h.valor)}</td><td><span class="bj ${h.status==='Concluído'?'g':'o'}">${h.status}</span></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:#bbb">Nenhum pedido registrado para este cliente.</td></tr>';
+  OM('mhc');
+}
+
+// ── RELATÓRIOS COMPLETO ──
+function setRDates(){const d=new Date();const y=d.getFullYear(),m=(d.getMonth()+1).toString().padStart(2,'0');document.getElementById('rde').value=`${y}-${m}-01`;document.getElementById('rat').value=hj();}
+function gerarR(){
+  const de=gv('rde'),at=gv('rat');
+  const vs=(DB.get(K.v)||[]).filter(v=>v.data>=de&&v.data<=at),cs=(DB.get(K.c)||[]).filter(c=>c.data>=de&&c.data<=at);
+  const tv=vs.reduce((a,v)=>a+Number(v.total||0),0),tc=cs.reduce((a,c)=>a+Number(c.valor||0),0);
+  sv('rrv',brl(tv));sv('rrc',brl(tc));
+  const lq=tv-tc;
+  const ll=document.getElementById('rrl');ll.textContent=brl(lq);ll.style.color=lq>=0?'var(--ok)':'var(--no)';
+  const movs=[...vs.map(v=>({data:v.data,tipo:'Venda',desc:v.produto||'-',val:Number(v.total||0),s:1})),...cs.map(c=>({data:c.data,tipo:'Compra',desc:c.fornecedor||'-',val:Number(c.valor||0),s:-1}))].sort((a,b)=>b.data.localeCompare(a.data));
+  document.getElementById('tbrv').innerHTML=movs.length?movs.map(m=>`<tr><td>${fd(m.data)}</td><td><span class="bj ${m.s>0?'g':'r'}">${m.tipo}</span></td><td>${m.desc}</td><td style="color:${m.s>0?'var(--ok)':'var(--no)'};font-weight:700">${m.s>0?'+':'–'}${brl(m.val)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#bbb">Sem dados no período</td></tr>';
+}
+
+</script>
+</body>
+</html>
