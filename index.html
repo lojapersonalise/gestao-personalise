@@ -264,7 +264,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v8.0 · Smart Sync & Paginação</div>
+  <div class="sb-foot">v8.1 · UI / UX</div>
 </div>
 
 <div id="main">
@@ -901,7 +901,6 @@ function addCard(){
   const cls=DB.get(K.cl)||[];
   let cleanTel = tel.replace(/\D/g, '');
 
-  // INTELIGÊNCIA: Verifica duplicidade de cliente e atualiza o nome
   let clienteExistente = null;
   if(cleanTel.length > 0) {
     clienteExistente = cls.find(c => c.tel && c.tel.replace(/\D/g, '') === cleanTel);
@@ -911,7 +910,7 @@ function addCard(){
   }
 
   if(clienteExistente) {
-    cli = clienteExistente.nome; // Usa o nome oficial para não quebrar o histórico
+    cli = clienteExistente.nome; 
   } else {
     cls.unshift({id:uid(),nome:cli,tel:tel,cidade:''});
     DB.set(K.cl,cls);
@@ -942,11 +941,26 @@ function abrModal(id){
   document.getElementById('mppg').checked=!!p.pago;document.getElementById('mpeg').checked=!!p.entregue;
   OM('mped');
 }
+
+// LÓGICA DE AVISO AO USUÁRIO QUANDO USA FILTRO
 function togF(flag){
   if(!actPed)return;const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;
-  ps[i][flag]=document.getElementById(flag==='pago'?'mppg':'mpeg').checked;
-  DB.set(K.p,ps);abrModal(actPed);atualizarKanbanEAlertas();toast('Atualizado!');
+  const isChecked = document.getElementById(flag==='pago'?'mppg':'mpeg').checked;
+  ps[i][flag] = isChecked;
+  DB.set(K.p,ps);
+  abrModal(actPed);
+  atualizarKanbanEAlertas();
+  
+  // Avisos mais claros para não achar que apagou do sistema
+  if(flag === 'pago' && activeFilter === 'pagamento' && isChecked) {
+     toast('💳 Pago! (Ocultado do filtro de devedores)');
+  } else if (flag === 'entregue' && (activeFilter === 'hoje' || activeFilter === 'atraso') && isChecked) {
+     toast('📦 Entregue! (Ocultado do filtro atual)');
+  } else {
+     toast('✅ Atualizado!');
+  }
 }
+
 function delPA(){CM('mped');conf('Excluir pedido?',()=>{DB.set(K.p,DB.get(K.p).filter(p=>p.id!==actPed));atualizarKanbanEAlertas();toast('Excluído!');});}
 function editPA(){
   const p=DB.get(K.p).find(x=>x.id===actPed);if(!p)return;
@@ -1036,7 +1050,7 @@ function renderE(){
 }
 function delE(id){conf('Excluir item?',()=>{DB.set(K.e,DB.get(K.e).filter(x=>x.id!==id));renderE();});}
 
-// ── CLIENTES, HISTÓRICO E PAGINAÇÃO ──
+// ── CLIENTES E HISTÓRICO ──
 let eclid=null;
 let currentPageCl = 1;
 const ITEMS_PER_PAGE = 10;
@@ -1055,7 +1069,6 @@ function renderCl(){
   let d=(DB.get(K.cl)||[]).filter(c=>!b||c.nome.toLowerCase().includes(b)||(c.tel&&c.tel.includes(b)));
   
   let pagHTML = '';
-  // Aplica paginação apenas se não houver busca ativa
   if(!b && d.length > ITEMS_PER_PAGE) {
     const totalPages = Math.ceil(d.length / ITEMS_PER_PAGE);
     if(currentPageCl > totalPages) currentPageCl = totalPages;
@@ -1073,7 +1086,7 @@ function renderCl(){
       </div>
     `;
   } else {
-      currentPageCl = 1; // Reseta se estiver buscando
+      currentPageCl = 1;
   }
 
   document.getElementById('tbcl').innerHTML=d.length?d.map(c=>`<tr><td><strong>${c.nome}</strong></td><td>${c.tel||'-'}</td><td>${c.cidade||'-'}</td><td><button class="btn bp sm" onclick="verHist('${c.nome}')">👁️ Histórico</button> <button class="btn bd sm" onclick="delCl('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#bbb">Nenhum cliente encontrado</td></tr>';
