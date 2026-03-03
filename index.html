@@ -167,10 +167,19 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 /* KANBAN BOARD */
 #kbs{padding-top:5px}#cs{display:none;padding-top:5px}
-#kb{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;align-items:flex-start;min-height:55vh;}
+
+/* Permitir arrastar o fundo do quadro */
+#kb {
+  display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; 
+  cursor: grab; /* Indica que é arrastável */
+}
+#kb:active {
+  cursor: grabbing;
+}
+
 .kc{background:#fdfafb;border-radius:12px;flex-shrink:0;display:flex;flex-direction:column;min-width:270px;max-width:270px;box-shadow:var(--sh);border:1px solid var(--px); transition: box-shadow 0.2s;}
 .kch{background:var(--w);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:5px;border-bottom:1px solid var(--px);border-top:3px solid var(--p);border-radius:12px 12px 0 0; cursor: grab;}
-.kch:active {cursor: grabbing;} /* Estilo para o clique de arrastar coluna */
+.kch:active {cursor: grabbing;} 
 .cn{font-weight:700;color:var(--pd);font-size:.9rem;flex:1}
 .cn.ed{cursor:pointer}.cn.ed:hover{text-decoration:underline dotted}
 .cm2{display:flex;align-items:center;gap:4px}
@@ -248,7 +257,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v6.5 · Real-Time Drag</div>
+  <div class="sb-foot">v7.0 · Drag to Scroll</div>
 </div>
 
 <div id="main">
@@ -596,7 +605,6 @@ async function iniciarApp() {
   document.getElementById('loader').classList.remove('off'); 
   const docRef = fbDB.collection('loja').doc('dados_personalise');
   
-  // onSnapshot = Efeito WhatsApp (Atualiza ao vivo entre PCs)
   docRef.onSnapshot((docSnap) => {
     if(docSnap.exists) {
         MEM = docSnap.data();
@@ -608,13 +616,12 @@ async function iniciarApp() {
     if(firstLoad) {
         document.getElementById('loader').classList.add('off');
         goTo(1); 
+        initDragToScroll(); // Inicia o Scroll do Kanban com o mouse
         toast("✅ Conectado em Tempo Real!");
         firstLoad = false;
     } else {
-        // Se a atualização veio de outro PC
         if (!docSnap.metadata.hasPendingWrites) {
             atualizarTelaAtual();
-            // Notificação super discreta apenas para avisar que outra pessoa alterou
             console.log("Sincronizado na nuvem."); 
         }
     }
@@ -632,6 +639,35 @@ function atualizarTelaAtual() {
   if (p4.classList.contains('on')) renderE();
   if (p5.classList.contains('on')) renderCl();
   if (p6.classList.contains('on')) gerarR();
+}
+
+// ── 4. ARRASTAR PARA ROLAR O KANBAN (DRAG TO SCROLL) ──
+function initDragToScroll() {
+  const slider = document.getElementById('kb');
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  slider.addEventListener('mousedown', (e) => {
+    // Não ativa a rolagem se clicar em um card (.kd), título da coluna (.kch), botões ou inputs
+    if (e.target.closest('.kd') || e.target.closest('.kch') || e.target.closest('button') || e.target.closest('input')) {
+        return;
+    }
+    isDown = true;
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  slider.addEventListener('mouseleave', () => { isDown = false; });
+  slider.addEventListener('mouseup', () => { isDown = false; });
+
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault(); // Evita selecionar texto sem querer
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5; // O multiplicador controla a velocidade
+    slider.scrollLeft = scrollLeft - walk;
+  });
 }
 
 // ── UTILS ──
@@ -743,7 +779,7 @@ function renderConc(){
 }
 function delConc(id){conf('Excluir este registro?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
-// ── KANBAN COMPLETO (FILTROS + ARRASTAR COLUNAS) ──
+// ── KANBAN COMPLETO (FILTROS + ARRASTAR COLUNAS E CARDS) ──
 let actPed=null,edColId=null,kbQ='';
 function filtKB(){kbQ=gv('kb-q').toLowerCase().trim();renderKB();}
 
@@ -773,7 +809,7 @@ function renderKB(){
     const tot=cards.reduce((a,p)=>a+Number(p.valor||0),0);
     const ce=document.createElement('div');
     ce.className='kc';
-    ce.dataset.colId = col.id; // Marca a coluna para o SortableJS de Colunas
+    ce.dataset.colId = col.id; 
     
     const hdr=document.createElement('div');
     hdr.className='kch';
@@ -796,18 +832,16 @@ function renderKB(){
     ce.appendChild(body);board.appendChild(ce);
   });
   
-  // Botão de Nova Coluna
   const btn=document.createElement('button');btn.className='bnc';btn.innerHTML='+';btn.onclick=()=>{document.getElementById('ncn').value='';OM('mnc');};board.appendChild(btn);
 
-  // 1. INICIALIZA O "ARRASTAR" PARA AS COLUNAS (Efeito Trello)
+  // 1. INICIALIZA O "ARRASTAR COLUNAS" (Efeito Trello)
   new Sortable(board, {
     animation: 150,
-    draggable: '.kc', // Só permite arrastar as colunas (ignora o botão +)
-    handle: '.kch',   // Só arrasta se pegar pelo cabeçalho
-    filter: '.bc',    // Não ativa o drag se clicar no X de apagar a coluna
+    draggable: '.kc', 
+    handle: '.kch',   
+    filter: '.bc',    
     ghostClass: 'sortable-ghost',
     onEnd: function (evt) {
-      // Quando soltar a coluna, salva a nova ordem no banco
       const newOrderIds = Array.from(board.querySelectorAll('.kc')).map(el => el.dataset.colId);
       const oldCols = getCols();
       const newCols = newOrderIds.map(id => oldCols.find(c => c.id === id)).filter(Boolean);
@@ -815,7 +849,7 @@ function renderKB(){
     }
   });
 
-  // 2. INICIALIZA O "ARRASTAR" PARA OS CARDS (Já existia)
+  // 2. INICIALIZA O "ARRASTAR CARDS" 
   document.querySelectorAll('.kcb').forEach(el => {
     new Sortable(el, {
       group: 'kanban',
