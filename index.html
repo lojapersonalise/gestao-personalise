@@ -31,6 +31,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);di
 /* TELA DE LOGIN */
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s;}
 .login-box{background:var(--w);padding:40px 30px;border-radius:12px;box-shadow:var(--sh);width:90%;max-width:380px;text-align:center;border-top:5px solid var(--p);}
+.login-box img {height: 140px; max-width: 100%; object-fit: contain; margin: 0 auto 25px auto; display: block;}
 .login-box p{color:var(--tl);font-size:.85rem;margin-bottom:25px;}
 .login-box input{width:100%;padding:11px;margin-bottom:14px;border:1.5px solid var(--bor);border-radius:7px;outline:none;font-size:0.95rem;}
 .login-box input:focus{border-color:var(--p);}
@@ -45,25 +46,10 @@ body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);di
 #sb{width:64px;min-height:100vh;background:var(--p);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:300;transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow:hidden;white-space:nowrap;box-shadow:4px 0 15px rgba(0,0,0,0.05);}
 #sb:hover{width:210px;box-shadow:4px 0 25px rgba(0,0,0,0.15);}
 
-/* CONTAINER DA LOGO NO MENU COM ALTURA FIXA E ANIMAÇÃO DE CRESCIMENTO */
-.sb-logo {
-    padding: 0 13px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid rgba(255,255,255,.15);
-    min-width: 210px;
-    height: 85px; /* Altura fixa para os botões não pularem */
-}
-.sidebar-logo {
-    height: 38px; /* Tamanho pequeno quando fechado (mostra só o ícone) */
-    width: 180px;
-    object-fit: contain;
-    object-position: left center;
-    transition: height 0.3s ease;
-}
-#sb:hover .sidebar-logo {
-    height: 116px; /* Tamanho grande quando aberto (mostra a marca toda) */
-}
+/* LOGO LATERAL */
+.sb-logo {padding: 0 13px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,.15); min-width: 210px; height: 85px;}
+.sidebar-logo {height: 38px; width: 180px; object-fit: contain; object-position: left center; transition: height 0.3s ease;}
+#sb:hover .sidebar-logo {height: 58px;}
 
 nav{flex:1;padding:12px 0;}
 nav a{display:flex;align-items:center;gap:16px;padding:12px 20px;color:rgba(255,255,255,.82);text-decoration:none;font-size:.9rem;cursor:pointer;border-left:3px solid transparent;transition:background .2s, border .2s;min-width:210px;}
@@ -82,10 +68,14 @@ h2.ttl{font-size:1.4rem;color:var(--pd);margin-bottom:18px;display:flex;align-it
 
 /* Alertas e Caixas */
 #alerts{margin-bottom:16px;display:flex;flex-direction:column;gap:6px}
-.al{display:flex;align-items:center;gap:8px;padding:8px 13px;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer}
+.al{display:flex;align-items:center;gap:8px;padding:8px 13px;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer; transition: transform 0.15s;}
+.al:hover{transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.08);}
 .al.da{background:#ffebee;color:var(--no);border:1px solid #ffcdd2}
 .al.wa{background:#fff3e0;color:var(--wa);border:1px solid #ffe0b2}
 .al.in{background:#e8eaf6;color:#3949ab;border:1px solid #c5cae9}
+
+#kb-filter-banner {display:none; align-items:center; justify-content:space-between; background:var(--pl); padding:10px 15px; border-radius:8px; margin-bottom:16px; font-weight:bold; color:var(--pd); border: 1px solid var(--p);}
+
 .cx-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
 .cx{background:var(--w);border-radius:11px;padding:14px 16px;box-shadow:var(--sh);border-top:4px solid var(--p)}
 .cx.g{border-top-color:var(--ok)}.cx.r{border-top-color:var(--no)}.cx.b{border-top-color:var(--in)}
@@ -227,12 +217,12 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 <div id="loader">
   <img src="logo-personalise.png" alt="Logo Personalise" style="height: 80px; margin-bottom: 20px;" />
-  <p style="color:var(--tl); font-size: 0.95rem;">Conectando à nuvem...</p>
+  <p style="color:var(--tl); font-size: 0.95rem;">Sincronizando em tempo real...</p>
 </div>
 
 <div id="login-screen" style="display:none;">
   <div class="login-box">
-    <img src="logo-personaliselogin.png" alt="Personalise Login" style="height: 240px; max-width: 100%; object-fit: contain; margin: 0 auto 20px auto; display: block;" />
+    <img src="logo-personaliselogin.png" alt="Personalise Login" />
     <p>Acesso restrito do sistema</p>
     <input type="email" id="log-email" placeholder="Seu E-mail" />
     <input type="password" id="log-pass" placeholder="Sua Senha" />
@@ -257,14 +247,13 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v5.2 · Cloud Segura</div>
+  <div class="sb-foot">v6.0 · Real-Time Sync</div>
 </div>
 
 <div id="main">
 
 <div id="p0" class="pg">
   <h2 class="ttl">📊 Dashboard</h2>
-  <div id="alerts"></div>
   <div class="cx-row">
     <div class="cx g"><span class="lb">Entrou hoje</span><span class="vl" id="cxe">R$ 0,00</span><span class="sb2" id="cxeq">0 vendas</span></div>
     <div class="cx r"><span class="lb">Saiu hoje</span><span class="vl" id="cxs">R$ 0,00</span><span class="sb2" id="cxsq">0 despesas</span></div>
@@ -282,10 +271,6 @@ input:checked+.sl:before{transform:translateX(19px)}
     <div class="ch"><h3>📅 Vendas vs Compras (6 meses)</h3><canvas id="ch1"></canvas></div>
     <div class="ch"><h3>🥧 Receita por categoria</h3><canvas id="ch2"></canvas></div>
   </div>
-  <div class="ch-row">
-    <div class="ch"><h3>📉 Fluxo de caixa (30 dias)</h3><canvas id="ch3"></canvas></div>
-    <div class="ch"><h3>📦 Pedidos por coluna</h3><canvas id="ch4"></canvas></div>
-  </div>
 </div>
 
 <div id="p1" class="pg">
@@ -300,6 +285,9 @@ input:checked+.sl:before{transform:translateX(19px)}
     </div>
   </div>
   
+  <div id="alerts"></div>
+  <div id="kb-filter-banner"></div>
+
   <div id="kbs">
     <div id="kb"></div>
   </div>
@@ -549,9 +537,9 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const fbDB = firebase.firestore();
-const auth = firebase.auth(); // Controle de Login
+const auth = firebase.auth();
 
-// ── 2. LÓGICA DE LOGIN E AUTENTICAÇÃO ──
+// ── 2. LÓGICA DE LOGIN ──
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('login-screen').style.display = 'none';
@@ -569,23 +557,18 @@ function fazerLogin() {
   const pass = document.getElementById('log-pass').value;
   const err = document.getElementById('login-error');
   err.style.display = 'none';
-  
   if(!email || !pass) { err.textContent = "Preencha e-mail e senha."; err.style.display = 'block'; return; }
-  
   auth.signInWithEmailAndPassword(email, pass).catch(error => {
     err.textContent = "Erro: E-mail ou senha incorretos.";
     err.style.display = 'block';
-    console.error(error);
   });
 }
+function fazerLogout() { auth.signOut(); }
 
-function fazerLogout() {
-  auth.signOut();
-}
-
-// ── 3. ESTRUTURA DE DADOS NA MEMÓRIA E SINCRONIZAÇÃO ──
+// ── 3. SINCRONIZAÇÃO EM TEMPO REAL ──
 const K = {p:'ps5_ped',co:'ps5_conc',col:'ps5_col',v:'ps5_vnd',c:'ps5_cmp',e:'ps5_est',cl:'ps5_cli'};
 let MEM = { [K.p]:[], [K.co]:[], [K.col]:[], [K.v]:[], [K.c]:[], [K.e]:[], [K.cl]:[] };
+let activeFilter = null; // Controle do Filtro do Kanban
 
 const DB = {
   get: k => MEM[k] || [],
@@ -593,8 +576,7 @@ const DB = {
     MEM[k] = v;
     if(auth.currentUser) {
       fbDB.collection('loja').doc('dados_personalise').set(MEM).catch(e => {
-          console.error("Erro ao salvar na nuvem:", e);
-          toast("Aviso: Falha de permissão ao salvar.", true);
+          toast("Aviso: Falha ao salvar na nuvem.", true);
       });
     }
   }
@@ -608,28 +590,46 @@ function getCols(){
   return d;
 }
 
-// ── 4. CARREGAR DADOS APÓS O LOGIN ──
+let firstLoad = true;
 async function iniciarApp() {
   document.getElementById('loader').classList.remove('off'); 
-  try {
-    const docRef = fbDB.collection('loja').doc('dados_personalise');
-    const docSnap = await docRef.get();
-    
+  const docRef = fbDB.collection('loja').doc('dados_personalise');
+  
+  // O SEGREDO DO TEMPO REAL ESTÁ AQUI (onSnapshot)
+  docRef.onSnapshot((docSnap) => {
     if(docSnap.exists) {
         MEM = docSnap.data();
     } else {
         MEM[K.col] = [{id:'c0',nome:'Novo Pedido',fixa:true}, {id:'c1',nome:'Em Produção',fixa:false}];
-        await docRef.set(MEM);
+        docRef.set(MEM);
     }
     
-    document.getElementById('loader').classList.add('off');
-    goTo(1); 
-    toast("✅ Bem-vindo à Personalise Cloud!");
+    if(firstLoad) {
+        document.getElementById('loader').classList.add('off');
+        goTo(1); 
+        toast("✅ Conectado em Tempo Real!");
+        firstLoad = false;
+    } else {
+        // Se a mudança não foi feita neste PC (foi no da sua esposa), atualiza a tela
+        if (!docSnap.metadata.hasPendingWrites) {
+            atualizarTelaAtual();
+            toast("🔄 Dados atualizados de outro PC!");
+        }
+    }
+  }, (erro) => {
+    if(firstLoad) document.getElementById('loader').innerHTML = `<h2 style="color:var(--no)">⚠️ Erro de Permissão</h2>`;
+  });
+}
 
-  } catch (erro) {
-    console.error("Erro no Firebase:", erro);
-    document.getElementById('loader').innerHTML = `<h2 style="color:var(--no)">⚠️ Erro</h2><p>Sem permissão ou erro de conexão.</p>`;
-  }
+function atualizarTelaAtual() {
+  const p0 = document.getElementById('p0'), p1 = document.getElementById('p1'), p2 = document.getElementById('p2'), p3 = document.getElementById('p3'), p4 = document.getElementById('p4'), p5 = document.getElementById('p5'), p6 = document.getElementById('p6');
+  if (p0.classList.contains('on')) buildDash();
+  if (p1.classList.contains('on')) atualizarKanbanEAlertas();
+  if (p2.classList.contains('on')) { renderV(); updDL(); }
+  if (p3.classList.contains('on')) renderC();
+  if (p4.classList.contains('on')) renderE();
+  if (p5.classList.contains('on')) renderCl();
+  if (p6.classList.contains('on')) gerarR();
 }
 
 // ── UTILS ──
@@ -659,37 +659,45 @@ function goTo(n){
   document.querySelectorAll('nav a').forEach(a=>a.classList.remove('on'));
   document.getElementById('p'+n).classList.add('on');
   document.getElementById('n'+n).classList.add('on');
-  const fx=[buildDash,()=>{renderKB();updDL();},()=>{renderV();updDL();},renderC,renderE,renderCl,()=>{setRDates();gerarR();}];
+  const fx=[buildDash,()=>{updDL(); atualizarKanbanEAlertas();},()=>{renderV();updDL();},renderC,renderE,renderCl,()=>{setRDates();gerarR();}];
   if(fx[n])fx[n]();
 }
 
-// ── ALERTAS E CAIXA ──
+function atualizarKanbanEAlertas() {
+   buildAlerts();
+   renderKB();
+}
+
+// ── ALERTAS COMO FILTROS ──
 function buildAlerts(){
-  const bar=document.getElementById('alerts');bar.innerHTML='';
+  const bar=document.getElementById('alerts');
+  if(!bar) return;
+  bar.innerHTML='';
   const ps=DB.get(K.p)||[];
   const at=ps.filter(p=>!p.entregue&&isL(p.entrega));
   const hj2=ps.filter(p=>!p.entregue&&isT(p.entrega));
   const pp=ps.filter(p=>!p.pago&&Number(p.valor||0)>0);
-  const add=(tp,ic,msg)=>{const d=document.createElement('div');d.className=`al ${tp}`;d.innerHTML=`<span>${ic}</span><span>${msg}</span>`;d.onclick=()=>goTo(1);bar.appendChild(d);};
-  if(at.length)add('da','🚨',`${at.length} pedido(s) ATRASADO(S)`);
-  if(hj2.length)add('wa','📅',`${hj2.length} entrega(s) para HOJE`);
-  if(pp.length)add('in','💳',`${pp.length} pedido(s) aguardando pagamento`);
-}
-function buildCaixa(){
-  const d=hj(),mes=d.slice(0,7);
-  const vs=DB.get(K.v)||[],cs=DB.get(K.c)||[];
-  const vH=vs.filter(v=>v.data===d),cH=cs.filter(c=>c.data===d);
-  const ent=vH.reduce((a,v)=>a+Number(v.total||0),0),sai=cH.reduce((a,c)=>a+Number(c.valor||0),0),sal=ent-sai;
-  const vM=vs.filter(v=>v.data.startsWith(mes)),totM=vM.reduce((a,v)=>a+Number(v.total||0),0);
-  sv('cxe',brl(ent));sv('cxeq',vH.length+' vendas');sv('cxs',brl(sai));sv('cxsq',cH.length+' despesas');
-  const se=document.getElementById('cxd');if(se){se.textContent=brl(sal);se.style.color=sal>=0?'var(--ok)':'var(--no)';}
-  sv('cxm',brl(totM));sv('cxmq',vM.length+' vendas no mês');
+  
+  bar.style.display = (at.length || hj2.length || pp.length) ? 'flex' : 'none';
+
+  // Função que aplica o filtro ao clicar
+  const add=(tp,ic,msg, filterType)=>{
+    const d=document.createElement('div');
+    d.className=`al ${tp}`;
+    d.innerHTML=`<span>${ic}</span><span>${msg}</span><span style="margin-left:auto;font-size:0.75rem;opacity:0.7;">Filtrar ➔</span>`;
+    d.onclick=() => { activeFilter = filterType; renderKB(); };
+    bar.appendChild(d);
+  };
+  
+  if(at.length)add('da','🚨',`${at.length} pedido(s) ATRASADO(S)`, 'atraso');
+  if(hj2.length)add('wa','📅',`${hj2.length} entrega(s) para HOJE`, 'hoje');
+  if(pp.length)add('in','💳',`${pp.length} pedido(s) aguardando pagamento`, 'pagamento');
 }
 
 // ── DASHBOARD ──
 let CHS={};
 function buildDash(){
-  buildAlerts();buildCaixa();
+  buildCaixa(); // Alertas removidos daqui
   const now=new Date(),mes=now.toISOString().slice(0,7);
   const vs=DB.get(K.v)||[],cs=DB.get(K.c)||[],ps=DB.get(K.p)||[],es=DB.get(K.e)||[];
   const vM=vs.filter(v=>v.data.startsWith(mes)),cM=cs.filter(c=>c.data.startsWith(mes));
@@ -704,6 +712,16 @@ function buildDash(){
   
   const cats={};vs.forEach(v=>{const c=v.categoria||'Outros';cats[c]=(cats[c]||0)+Number(v.total||0);});
   mkC('ch2','pie',Object.keys(cats),[{data:Object.values(cats),backgroundColor:['#784A91','#9b6bb5','#b892cc','#5a3570','#c9a0e0','#3f51b5']}]);
+}
+function buildCaixa(){
+  const d=hj(),mes=d.slice(0,7);
+  const vs=DB.get(K.v)||[],cs=DB.get(K.c)||[];
+  const vH=vs.filter(v=>v.data===d),cH=cs.filter(c=>c.data===d);
+  const ent=vH.reduce((a,v)=>a+Number(v.total||0),0),sai=cH.reduce((a,c)=>a+Number(c.valor||0),0),sal=ent-sai;
+  const vM=vs.filter(v=>v.data.startsWith(mes)),totM=vM.reduce((a,v)=>a+Number(v.total||0),0);
+  sv('cxe',brl(ent));sv('cxeq',vH.length+' vendas');sv('cxs',brl(sai));sv('cxsq',cH.length+' despesas');
+  const se=document.getElementById('cxd');if(se){se.textContent=brl(sal);se.style.color=sal>=0?'var(--ok)':'var(--no)';}
+  sv('cxm',brl(totM));sv('cxmq',vM.length+' vendas no mês');
 }
 function mkC(id,type,labels,datasets){
   if(CHS[id])CHS[id].destroy();
@@ -724,14 +742,35 @@ function renderConc(){
 }
 function delConc(id){conf('Excluir este registro?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
-// ── KANBAN COMPLETO ──
+// ── KANBAN COMPLETO (COM FILTROS) ──
 let actPed=null,edColId=null,kbQ='';
 function filtKB(){kbQ=gv('kb-q').toLowerCase().trim();renderKB();}
 
 function renderKB(){
   const board=document.getElementById('kb');const cols=getCols();const ps=DB.get(K.p)||[];board.innerHTML='';
+  
+  // Banner de Filtro Ativo
+  const filterBanner = document.getElementById('kb-filter-banner');
+  if (activeFilter) {
+     let txt = '';
+     if (activeFilter === 'hoje') txt = '📅 Exibindo apenas: Entregas para Hoje';
+     if (activeFilter === 'atraso') txt = '🚨 Exibindo apenas: Pedidos Atrasados';
+     if (activeFilter === 'pagamento') txt = '💳 Exibindo apenas: Aguardando Pagamento';
+     filterBanner.innerHTML = `<span>${txt}</span> <button class="btn bd sm" onclick="activeFilter=null; atualizarKanbanEAlertas();">❌ Limpar Filtro</button>`;
+     filterBanner.style.display = 'flex';
+  } else {
+     filterBanner.style.display = 'none';
+  }
+
   cols.forEach((col)=>{
-    const cards=ps.filter(p=>(p.colId||cols[0].id)===col.id);
+    // Aplicação dos filtros na hora de puxar os cards da coluna
+    let cards = ps.filter(p=>(p.colId||cols[0].id)===col.id);
+    
+    if (activeFilter === 'hoje') cards = cards.filter(p => !p.entregue && isT(p.entrega));
+    if (activeFilter === 'atraso') cards = cards.filter(p => !p.entregue && isL(p.entrega));
+    if (activeFilter === 'pagamento') cards = cards.filter(p => !p.pago && Number(p.valor||0)>0);
+    if (kbQ) cards = cards.filter(p => p.cliente.toLowerCase().includes(kbQ) || p.desc.toLowerCase().includes(kbQ));
+
     const tot=cards.reduce((a,p)=>a+Number(p.valor||0),0);
     const ce=document.createElement('div');ce.className='kc';
     const hdr=document.createElement('div');hdr.className='kch';
@@ -768,7 +807,6 @@ function renderKB(){
         if(i !== -1 && ps[i].colId !== toColId) {
           ps[i].colId = toColId;
           DB.set(K.p, ps);
-          setTimeout(buildDash, 100); 
         }
       },
     });
@@ -792,7 +830,7 @@ function addCard(){
   }
 
   document.getElementById('ifc').value='';document.getElementById('ifd').value='';document.getElementById('ifv').value='';document.getElementById('ifs').value='';document.getElementById('ift').value='';document.getElementById('ife').value='';
-  CM('mnp');renderKB();toast('✅ Pedido adicionado!');
+  CM('mnp'); atualizarKanbanEAlertas(); toast('✅ Pedido adicionado!');
 }
 
 function abrModal(id){
@@ -813,9 +851,9 @@ function abrModal(id){
 function togF(flag){
   if(!actPed)return;const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;
   ps[i][flag]=document.getElementById(flag==='pago'?'mppg':'mpeg').checked;
-  DB.set(K.p,ps);abrModal(actPed);renderKB();toast('Atualizado!');
+  DB.set(K.p,ps);abrModal(actPed);atualizarKanbanEAlertas();toast('Atualizado!');
 }
-function delPA(){CM('mped');conf('Excluir pedido?',()=>{DB.set(K.p,DB.get(K.p).filter(p=>p.id!==actPed));renderKB();toast('Excluído!');});}
+function delPA(){CM('mped');conf('Excluir pedido?',()=>{DB.set(K.p,DB.get(K.p).filter(p=>p.id!==actPed));atualizarKanbanEAlertas();toast('Excluído!');});}
 function editPA(){
   const p=DB.get(K.p).find(x=>x.id===actPed);if(!p)return;
   document.getElementById('epc').value=p.cliente;document.getElementById('ept').value=p.tel||'';document.getElementById('epe').value=p.entrega||'';document.getElementById('epv').value=p.valor;document.getElementById('eps').value=p.sinal;document.getElementById('epd').value=p.desc;
@@ -825,13 +863,13 @@ function salvarEd(){
   const cli=gv('epc').trim(),desc=gv('epd').trim();if(!cli||!desc){toast('Preencha campos!',true);return;}
   const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;
   ps[i]={...ps[i],cliente:cli,tel:gv('ept').trim(),entrega:gv('epe'),valor:Number(gv('epv')||0),sinal:Number(gv('eps')||0),desc};
-  DB.set(K.p,ps);CM('mep');renderKB();toast('Atualizado!');
+  DB.set(K.p,ps);CM('mep');atualizarKanbanEAlertas();toast('Atualizado!');
 }
 
-function criarCol(){const n=gv('ncn').trim();if(n){const c=getCols();c.push({id:'c'+uid(),nome:n,fixa:false});DB.set(K.col,c);CM('mnc');renderKB();}}
+function criarCol(){const n=gv('ncn').trim();if(n){const c=getCols();c.push({id:'c'+uid(),nome:n,fixa:false});DB.set(K.col,c);CM('mnc');atualizarKanbanEAlertas();}}
 function abrRnc(id){edColId=id;const col=getCols().find(c=>c.id===id);document.getElementById('rcn').value=col?col.nome:'';OM('mrc');}
-function renCol(){const n=gv('rcn').trim();if(n&&edColId){const c=getCols();const i=c.findIndex(x=>x.id===edColId);if(i!==-1)c[i].nome=n;DB.set(K.col,c);CM('mrc');renderKB();}}
-function delCol(id){if(DB.get(K.p).some(p=>(p.colId||getCols()[0].id)===id)){toast('Mova os pedidos antes!',true);return;}conf('Excluir?',()=>{DB.set(K.col,getCols().filter(c=>c.id!==id));renderKB();});}
+function renCol(){const n=gv('rcn').trim();if(n&&edColId){const c=getCols();const i=c.findIndex(x=>x.id===edColId);if(i!==-1)c[i].nome=n;DB.set(K.col,c);CM('mrc');atualizarKanbanEAlertas();}}
+function delCol(id){if(DB.get(K.p).some(p=>(p.colId||getCols()[0].id)===id)){toast('Mova os pedidos antes!',true);return;}conf('Excluir?',()=>{DB.set(K.col,getCols().filter(c=>c.id!==id));atualizarKanbanEAlertas();});}
 
 // Lançar como Venda
 function popEstSel(){const sel=document.getElementById('lvest');if(!sel)return;sel.innerHTML=`<option value="">— Não abater —</option>`+(DB.get(K.e)||[]).map(e=>`<option value="${e.id}">${e.nome}</option>`).join('');}
@@ -849,7 +887,7 @@ function confLV(){
   const estId=gv('lvest');if(estId){const es=DB.get(K.e);const ei=es.findIndex(e=>e.id===estId);if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-Number(gv('lvq')||1));DB.set(K.e,es);}}
   
   const co=DB.get(K.co)||[];co.unshift({id:uid(),cliente:ped.cliente,desc:ped.desc,valor:ped.valor,dataConc:hj()});DB.set(K.co,co);
-  ps.splice(i,1);DB.set(K.p,ps);CM('mlv');renderKB();toast('✅ Lançado como Venda!');
+  ps.splice(i,1);DB.set(K.p,ps);CM('mlv');atualizarKanbanEAlertas();toast('✅ Lançado como Venda!');
 }
 
 // ── VENDAS COMPLETO ──
@@ -947,4 +985,3 @@ function gerarR(){
 </script>
 </body>
 </html>
-
