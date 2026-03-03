@@ -171,7 +171,7 @@ input:checked+.sl:before{transform:translateX(19px)}
 /* Permitir arrastar o fundo do quadro */
 #kb {
   display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; 
-  cursor: grab; /* Indica que é arrastável */
+  cursor: grab;
 }
 #kb:active {
   cursor: grabbing;
@@ -199,6 +199,11 @@ input:checked+.sl:before{transform:translateX(19px)}
 .kd.pg{border-left-color:var(--ok)}.kd.eg{border-left-color:#9e9e9e;opacity:.65}
 .kt{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;margin-bottom:4px}
 .kn{font-weight:700;font-size:.86rem;color:var(--text);}
+
+/* TELEFONE COPIÁVEL NO CARD */
+.k-tel {font-size:0.68rem; color:var(--p); cursor:copy; font-weight:600; display:inline-block; user-select:text; margin-top:2px;}
+.k-tel:hover {color:var(--in); text-decoration:underline;}
+
 .kv{font-size:.77rem;font-weight:700;color:var(--p);white-space:nowrap}
 .kdc{font-size:.74rem;color:var(--tl);margin-bottom:8px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.4;}
 .kft{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:3px}
@@ -257,7 +262,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v7.0 · Drag to Scroll</div>
+  <div class="sb-foot">v7.1 · Copiar Tel</div>
 </div>
 
 <div id="main">
@@ -616,7 +621,7 @@ async function iniciarApp() {
     if(firstLoad) {
         document.getElementById('loader').classList.add('off');
         goTo(1); 
-        initDragToScroll(); // Inicia o Scroll do Kanban com o mouse
+        initDragToScroll(); 
         toast("✅ Conectado em Tempo Real!");
         firstLoad = false;
     } else {
@@ -641,7 +646,7 @@ function atualizarTelaAtual() {
   if (p6.classList.contains('on')) gerarR();
 }
 
-// ── 4. ARRASTAR PARA ROLAR O KANBAN (DRAG TO SCROLL) ──
+// ── 4. ARRASTAR PARA ROLAR O KANBAN E COPIAR TEXTO ──
 function initDragToScroll() {
   const slider = document.getElementById('kb');
   let isDown = false;
@@ -649,8 +654,7 @@ function initDragToScroll() {
   let scrollLeft;
 
   slider.addEventListener('mousedown', (e) => {
-    // Não ativa a rolagem se clicar em um card (.kd), título da coluna (.kch), botões ou inputs
-    if (e.target.closest('.kd') || e.target.closest('.kch') || e.target.closest('button') || e.target.closest('input')) {
+    if (e.target.closest('.kd') || e.target.closest('.kch') || e.target.closest('button') || e.target.closest('input') || e.target.closest('.k-tel')) {
         return;
     }
     isDown = true;
@@ -663,10 +667,19 @@ function initDragToScroll() {
 
   slider.addEventListener('mousemove', (e) => {
     if (!isDown) return;
-    e.preventDefault(); // Evita selecionar texto sem querer
+    e.preventDefault(); 
     const x = e.pageX - slider.offsetLeft;
-    const walk = (x - startX) * 1.5; // O multiplicador controla a velocidade
+    const walk = (x - startX) * 1.5; 
     slider.scrollLeft = scrollLeft - walk;
+  });
+}
+
+function copiarTexto(e, texto) {
+  e.stopPropagation(); // Evita abrir o card ao clicar no número
+  navigator.clipboard.writeText(texto).then(() => {
+    toast('📋 Número copiado!');
+  }).catch(err => {
+    console.error('Erro ao copiar', err);
   });
 }
 
@@ -779,7 +792,7 @@ function renderConc(){
 }
 function delConc(id){conf('Excluir este registro?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
-// ── KANBAN COMPLETO (FILTROS + ARRASTAR COLUNAS E CARDS) ──
+// ── KANBAN COMPLETO ──
 let actPed=null,edColId=null,kbQ='';
 function filtKB(){kbQ=gv('kb-q').toLowerCase().trim();renderKB();}
 
@@ -825,7 +838,20 @@ function renderKB(){
       el.dataset.id = p.id;
       const rest=Number(p.valor||0)-Number(p.sinal||0);
       
-      el.innerHTML=`<div class="kt"><span class="kn">${p.cliente}</span><span class="kv">${brl(p.valor)}</span></div><div class="kdc">${p.desc}</div><div class="kft"><span class="kda">${p.entrega?'📅 '+fd(p.entrega):''}</span><div class="kg">${p.pago?'<span class="tg2 pg">✅ Pago</span>':(rest>0?`<span class="tg2 pn">💳 ${brl(rest)}</span>`:'')}</div></div>`;
+      // HTML com o telefone clicável abaixo do nome
+      const telHtml = p.tel ? `<div class="k-tel" onmousedown="event.stopPropagation()" onclick="copiarTexto(event, '${p.tel}')" title="Clique para copiar">📱 ${p.tel}</div>` : '';
+      
+      el.innerHTML=`
+        <div class="kt">
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <span class="kn">${p.cliente}</span>
+            ${telHtml}
+          </div>
+          <span class="kv">${brl(p.valor)}</span>
+        </div>
+        <div class="kdc">${p.desc}</div>
+        <div class="kft"><span class="kda">${p.entrega?'📅 '+fd(p.entrega):''}</span><div class="kg">${p.pago?'<span class="tg2 pg">✅ Pago</span>':(rest>0?`<span class="tg2 pn">💳 ${brl(rest)}</span>`:'')}</div></div>
+      `;
       el.addEventListener('click',()=>abrModal(p.id));
       body.appendChild(el);
     });
@@ -834,7 +860,6 @@ function renderKB(){
   
   const btn=document.createElement('button');btn.className='bnc';btn.innerHTML='+';btn.onclick=()=>{document.getElementById('ncn').value='';OM('mnc');};board.appendChild(btn);
 
-  // 1. INICIALIZA O "ARRASTAR COLUNAS" (Efeito Trello)
   new Sortable(board, {
     animation: 150,
     draggable: '.kc', 
@@ -849,7 +874,6 @@ function renderKB(){
     }
   });
 
-  // 2. INICIALIZA O "ARRASTAR CARDS" 
   document.querySelectorAll('.kcb').forEach(el => {
     new Sortable(el, {
       group: 'kanban',
