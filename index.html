@@ -105,6 +105,13 @@ tr:hover td{background:var(--px)}
 .bj.o{background:#fff3e0;color:var(--wa)}.bj.b{background:#e3f2fd;color:var(--in)}
 .bj.p{background:var(--pl);color:var(--pd)}
 
+/* Paginação Clientes */
+.pag-container { display: flex; align-items: center; justify-content: center; gap: 15px; padding-top: 15px; margin-top: 10px; border-top: 1px solid var(--px); }
+.pag-btn { background: var(--w); border: 1.5px solid var(--bor); color: var(--p); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: all 0.2s; }
+.pag-btn:hover:not(:disabled) { background: var(--px); border-color: var(--p); }
+.pag-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pag-info { font-size: 0.8rem; color: var(--tl); font-weight: bold; }
+
 /* Formulários Gerais */
 .fc{background:var(--w);border-radius:11px;padding:18px;box-shadow:var(--sh);margin-bottom:18px;max-width:760px}
 .fc h3{font-size:.92rem;color:var(--p);margin-bottom:14px}
@@ -169,13 +176,8 @@ input:checked+.sl:before{transform:translateX(19px)}
 #kbs{padding-top:5px}#cs{display:none;padding-top:5px}
 
 /* Permitir arrastar o fundo do quadro */
-#kb {
-  display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; 
-  cursor: grab;
-}
-#kb:active {
-  cursor: grabbing;
-}
+#kb { display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; cursor: grab;}
+#kb:active { cursor: grabbing;}
 
 .kc{background:#fdfafb;border-radius:12px;flex-shrink:0;display:flex;flex-direction:column;min-width:270px;max-width:270px;box-shadow:var(--sh);border:1px solid var(--px); transition: box-shadow 0.2s;}
 .kch{background:var(--w);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:5px;border-bottom:1px solid var(--px);border-top:3px solid var(--p);border-radius:12px 12px 0 0; cursor: grab;}
@@ -262,7 +264,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v7.1 · Copiar Tel</div>
+  <div class="sb-foot">v8.0 · Smart Sync & Paginação</div>
 </div>
 
 <div id="main">
@@ -409,6 +411,7 @@ input:checked+.sl:before{transform:translateX(19px)}
   <div class="tc"><h3>Clientes Cadastrados</h3>
     <table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Ações</th></tr></thead>
     <tbody id="tbcl"></tbody></table>
+    <div id="cl-pag"></div>
   </div>
 </div>
 
@@ -627,7 +630,6 @@ async function iniciarApp() {
     } else {
         if (!docSnap.metadata.hasPendingWrites) {
             atualizarTelaAtual();
-            console.log("Sincronizado na nuvem."); 
         }
     }
   }, (erro) => {
@@ -675,7 +677,7 @@ function initDragToScroll() {
 }
 
 function copiarTexto(e, texto) {
-  e.stopPropagation(); // Evita abrir o card ao clicar no número
+  e.stopPropagation(); 
   navigator.clipboard.writeText(texto).then(() => {
     toast('📋 Número copiado!');
   }).catch(err => {
@@ -838,7 +840,6 @@ function renderKB(){
       el.dataset.id = p.id;
       const rest=Number(p.valor||0)-Number(p.sinal||0);
       
-      // HTML com o telefone clicável abaixo do nome
       const telHtml = p.tel ? `<div class="k-tel" onmousedown="event.stopPropagation()" onclick="copiarTexto(event, '${p.tel}')" title="Clique para copiar">📱 ${p.tel}</div>` : '';
       
       el.innerHTML=`
@@ -894,19 +895,33 @@ function renderKB(){
 }
 
 function addCard(){
-  const cli=gv('ifc').trim(),desc=gv('ifd').trim(),tel=gv('ift').trim();
+  let cli=gv('ifc').trim(),desc=gv('ifd').trim(),tel=gv('ift').trim();
   if(!cli||!desc){toast('Preencha cliente e descrição!',true);return;}
-  const cols=getCols();const ps=DB.get(K.p)||[];
-  ps.unshift({id:uid(),colId:cols[0].id,cliente:cli,desc,valor:Number(gv('ifv')||0),sinal:Number(gv('ifs')||0),tel:tel,entrega:gv('ife'),data:hj(),pago:false,entregue:false});
-  DB.set(K.p,ps);
   
   const cls=DB.get(K.cl)||[];
-  if(!cls.some(c=>c.nome.toLowerCase()===cli.toLowerCase())){
+  let cleanTel = tel.replace(/\D/g, '');
+
+  // INTELIGÊNCIA: Verifica duplicidade de cliente e atualiza o nome
+  let clienteExistente = null;
+  if(cleanTel.length > 0) {
+    clienteExistente = cls.find(c => c.tel && c.tel.replace(/\D/g, '') === cleanTel);
+  }
+  if(!clienteExistente) {
+    clienteExistente = cls.find(c => c.nome.toLowerCase() === cli.toLowerCase());
+  }
+
+  if(clienteExistente) {
+    cli = clienteExistente.nome; // Usa o nome oficial para não quebrar o histórico
+  } else {
     cls.unshift({id:uid(),nome:cli,tel:tel,cidade:''});
     DB.set(K.cl,cls);
     updDL();
     if(document.getElementById('p5').classList.contains('on')) renderCl();
   }
+
+  const cols=getCols();const ps=DB.get(K.p)||[];
+  ps.unshift({id:uid(),colId:cols[0].id,cliente:cli,desc,valor:Number(gv('ifv')||0),sinal:Number(gv('ifs')||0),tel:tel,entrega:gv('ife'),data:hj(),pago:false,entregue:false});
+  DB.set(K.p,ps);
 
   document.getElementById('ifc').value='';document.getElementById('ifd').value='';document.getElementById('ifv').value='';document.getElementById('ifs').value='';document.getElementById('ift').value='';document.getElementById('ife').value='';
   CM('mnp'); atualizarKanbanEAlertas(); toast('✅ Pedido adicionado!');
@@ -1021,8 +1036,11 @@ function renderE(){
 }
 function delE(id){conf('Excluir item?',()=>{DB.set(K.e,DB.get(K.e).filter(x=>x.id!==id));renderE();});}
 
-// ── CLIENTES E HISTÓRICO ──
+// ── CLIENTES, HISTÓRICO E PAGINAÇÃO ──
 let eclid=null;
+let currentPageCl = 1;
+const ITEMS_PER_PAGE = 10;
+
 function salvarCl(){
   const n=gv('cln').trim();if(!n){toast('Preencha o nome!',true);return;}
   const cls=DB.get(K.cl)||[];const id=eclid||uid();
@@ -1031,11 +1049,43 @@ function salvarCl(){
   DB.set(K.cl,cls); limCl(); renderCl(); toast('✅ Cliente salvo!');
 }
 function limCl(){document.getElementById('cln').value='';document.getElementById('clt').value='';document.getElementById('clc').value='';eclid=null;}
+
 function renderCl(){
   const b=gv('fclb').toLowerCase();
-  const d=(DB.get(K.cl)||[]).filter(c=>!b||c.nome.toLowerCase().includes(b)||(c.tel&&c.tel.includes(b)));
+  let d=(DB.get(K.cl)||[]).filter(c=>!b||c.nome.toLowerCase().includes(b)||(c.tel&&c.tel.includes(b)));
+  
+  let pagHTML = '';
+  // Aplica paginação apenas se não houver busca ativa
+  if(!b && d.length > ITEMS_PER_PAGE) {
+    const totalPages = Math.ceil(d.length / ITEMS_PER_PAGE);
+    if(currentPageCl > totalPages) currentPageCl = totalPages;
+    if(currentPageCl < 1) currentPageCl = 1;
+    
+    const start = (currentPageCl - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    d = d.slice(start, end);
+    
+    pagHTML = `
+      <div class="pag-container">
+        <button class="pag-btn" onclick="mudarPagCl(-1)" ${currentPageCl === 1 ? 'disabled' : ''}>⬅️ Anterior</button>
+        <span class="pag-info">Página ${currentPageCl} de ${totalPages}</span>
+        <button class="pag-btn" onclick="mudarPagCl(1)" ${currentPageCl === totalPages ? 'disabled' : ''}>Próxima ➡️</button>
+      </div>
+    `;
+  } else {
+      currentPageCl = 1; // Reseta se estiver buscando
+  }
+
   document.getElementById('tbcl').innerHTML=d.length?d.map(c=>`<tr><td><strong>${c.nome}</strong></td><td>${c.tel||'-'}</td><td>${c.cidade||'-'}</td><td><button class="btn bp sm" onclick="verHist('${c.nome}')">👁️ Histórico</button> <button class="btn bd sm" onclick="delCl('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#bbb">Nenhum cliente encontrado</td></tr>';
+  
+  document.getElementById('cl-pag').innerHTML = pagHTML;
 }
+
+function mudarPagCl(dir) {
+  currentPageCl += dir;
+  renderCl();
+}
+
 function delCl(id){conf('Excluir cliente?',()=>{DB.set(K.cl,DB.get(K.cl).filter(x=>x.id!==id));renderCl();});}
 
 function verHist(nome){
