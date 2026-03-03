@@ -193,12 +193,12 @@ input:checked+.sl:before{transform:translateX(19px)}
 .bnc{min-width:42px;max-width:42px;height:42px;border-radius:50%;background:var(--w);border:2px dashed var(--tl);color:var(--tl);font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:flex-start;transition:all 0.2s;}
 .bnc:hover{border-color:var(--p);color:var(--p);background:var(--px);}
 
-/* CARD KANBAN */
+/* CARD KANBAN (ATUALIZADO PARA NÃO USAR .pg) */
 .kd{background:var(--w);border-radius:8px;border-left:4px solid var(--p);padding:10px;cursor:grab;box-shadow:0 2px 5px rgba(120,74,145,.06);transition:transform .15s,box-shadow .15s;position:relative}
 .kd:active{cursor:grabbing;}
 .kd.sortable-ghost { opacity: 0.4; background-color: #fdf5ff; }
 .kd:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(120,74,145,.12)}
-.kd.pg{border-left-color:var(--ok)}.kd.eg{border-left-color:#9e9e9e;opacity:.65}
+.kd.k-pago{border-left-color:var(--ok)}.kd.eg{border-left-color:#9e9e9e;opacity:.65}
 .kt{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;margin-bottom:4px}
 .kn{font-weight:700;font-size:.86rem;color:var(--text);}
 
@@ -212,7 +212,7 @@ input:checked+.sl:before{transform:translateX(19px)}
 .kda{font-size:.67rem;color:var(--tl)}.kda.lt{color:var(--no);font-weight:700}
 .kg{display:flex;gap:4px;flex-wrap:wrap}
 .tg2{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:6px}
-.tg2.pg{background:#e8f5e9;color:var(--ok)}.tg2.eg{background:#eee;color:#555}.tg2.pn{background:#fff3e0;color:var(--wa)}
+.tg2.t-pago{background:#e8f5e9;color:var(--ok)}.tg2.eg{background:#eee;color:#555}.tg2.pn{background:#fff3e0;color:var(--wa)}
 
 /* Overlay de Loading do Firebase */
 #loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.4s;}
@@ -264,7 +264,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v8.1 · UI / UX</div>
+  <div class="sb-foot">v8.2 · BugFix Cartões</div>
 </div>
 
 <div id="main">
@@ -836,7 +836,8 @@ function renderKB(){
 
     cards.forEach(p=>{
       const el=document.createElement('div');
-      el.className=`kd ${p.entregue?'eg':''} ${p.pago?'pg':''}`;
+      // CORREÇÃO AQUI: Troca de 'pg' para 'k-pago'
+      el.className=`kd ${p.entregue?'eg':''} ${p.pago?'k-pago':''}`;
       el.dataset.id = p.id;
       const rest=Number(p.valor||0)-Number(p.sinal||0);
       
@@ -851,7 +852,7 @@ function renderKB(){
           <span class="kv">${brl(p.valor)}</span>
         </div>
         <div class="kdc">${p.desc}</div>
-        <div class="kft"><span class="kda">${p.entrega?'📅 '+fd(p.entrega):''}</span><div class="kg">${p.pago?'<span class="tg2 pg">✅ Pago</span>':(rest>0?`<span class="tg2 pn">💳 ${brl(rest)}</span>`:'')}</div></div>
+        <div class="kft"><span class="kda">${p.entrega?'📅 '+fd(p.entrega):''}</span><div class="kg">${p.pago?'<span class="tg2 t-pago">✅ Pago</span>':(rest>0?`<span class="tg2 pn">💳 ${brl(rest)}</span>`:'')}</div></div>
       `;
       el.addEventListener('click',()=>abrModal(p.id));
       body.appendChild(el);
@@ -942,7 +943,6 @@ function abrModal(id){
   OM('mped');
 }
 
-// LÓGICA DE AVISO AO USUÁRIO QUANDO USA FILTRO
 function togF(flag){
   if(!actPed)return;const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;
   const isChecked = document.getElementById(flag==='pago'?'mppg':'mpeg').checked;
@@ -951,7 +951,6 @@ function togF(flag){
   abrModal(actPed);
   atualizarKanbanEAlertas();
   
-  // Avisos mais claros para não achar que apagou do sistema
   if(flag === 'pago' && activeFilter === 'pagamento' && isChecked) {
      toast('💳 Pago! (Ocultado do filtro de devedores)');
   } else if (flag === 'entregue' && (activeFilter === 'hoje' || activeFilter === 'atraso') && isChecked) {
