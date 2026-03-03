@@ -168,8 +168,9 @@ input:checked+.sl:before{transform:translateX(19px)}
 /* KANBAN BOARD */
 #kbs{padding-top:5px}#cs{display:none;padding-top:5px}
 #kb{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;align-items:flex-start;min-height:55vh;}
-.kc{background:#fdfafb;border-radius:12px;flex-shrink:0;display:flex;flex-direction:column;min-width:270px;max-width:270px;box-shadow:var(--sh);border:1px solid var(--px);}
-.kch{background:var(--w);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:5px;border-bottom:1px solid var(--px);border-top:3px solid var(--p);border-radius:12px 12px 0 0;}
+.kc{background:#fdfafb;border-radius:12px;flex-shrink:0;display:flex;flex-direction:column;min-width:270px;max-width:270px;box-shadow:var(--sh);border:1px solid var(--px); transition: box-shadow 0.2s;}
+.kch{background:var(--w);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:5px;border-bottom:1px solid var(--px);border-top:3px solid var(--p);border-radius:12px 12px 0 0; cursor: grab;}
+.kch:active {cursor: grabbing;} /* Estilo para o clique de arrastar coluna */
 .cn{font-weight:700;color:var(--pd);font-size:.9rem;flex:1}
 .cn.ed{cursor:pointer}.cn.ed:hover{text-decoration:underline dotted}
 .cm2{display:flex;align-items:center;gap:4px}
@@ -247,7 +248,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v6.0 · Real-Time Sync</div>
+  <div class="sb-foot">v6.5 · Real-Time Drag</div>
 </div>
 
 <div id="main">
@@ -568,7 +569,7 @@ function fazerLogout() { auth.signOut(); }
 // ── 3. SINCRONIZAÇÃO EM TEMPO REAL ──
 const K = {p:'ps5_ped',co:'ps5_conc',col:'ps5_col',v:'ps5_vnd',c:'ps5_cmp',e:'ps5_est',cl:'ps5_cli'};
 let MEM = { [K.p]:[], [K.co]:[], [K.col]:[], [K.v]:[], [K.c]:[], [K.e]:[], [K.cl]:[] };
-let activeFilter = null; // Controle do Filtro do Kanban
+let activeFilter = null; 
 
 const DB = {
   get: k => MEM[k] || [],
@@ -595,7 +596,7 @@ async function iniciarApp() {
   document.getElementById('loader').classList.remove('off'); 
   const docRef = fbDB.collection('loja').doc('dados_personalise');
   
-  // O SEGREDO DO TEMPO REAL ESTÁ AQUI (onSnapshot)
+  // onSnapshot = Efeito WhatsApp (Atualiza ao vivo entre PCs)
   docRef.onSnapshot((docSnap) => {
     if(docSnap.exists) {
         MEM = docSnap.data();
@@ -610,10 +611,11 @@ async function iniciarApp() {
         toast("✅ Conectado em Tempo Real!");
         firstLoad = false;
     } else {
-        // Se a mudança não foi feita neste PC (foi no da sua esposa), atualiza a tela
+        // Se a atualização veio de outro PC
         if (!docSnap.metadata.hasPendingWrites) {
             atualizarTelaAtual();
-            toast("🔄 Dados atualizados de outro PC!");
+            // Notificação super discreta apenas para avisar que outra pessoa alterou
+            console.log("Sincronizado na nuvem."); 
         }
     }
   }, (erro) => {
@@ -680,7 +682,6 @@ function buildAlerts(){
   
   bar.style.display = (at.length || hj2.length || pp.length) ? 'flex' : 'none';
 
-  // Função que aplica o filtro ao clicar
   const add=(tp,ic,msg, filterType)=>{
     const d=document.createElement('div');
     d.className=`al ${tp}`;
@@ -697,7 +698,7 @@ function buildAlerts(){
 // ── DASHBOARD ──
 let CHS={};
 function buildDash(){
-  buildCaixa(); // Alertas removidos daqui
+  buildCaixa(); 
   const now=new Date(),mes=now.toISOString().slice(0,7);
   const vs=DB.get(K.v)||[],cs=DB.get(K.c)||[],ps=DB.get(K.p)||[],es=DB.get(K.e)||[];
   const vM=vs.filter(v=>v.data.startsWith(mes)),cM=cs.filter(c=>c.data.startsWith(mes));
@@ -742,14 +743,13 @@ function renderConc(){
 }
 function delConc(id){conf('Excluir este registro?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
-// ── KANBAN COMPLETO (COM FILTROS) ──
+// ── KANBAN COMPLETO (FILTROS + ARRASTAR COLUNAS) ──
 let actPed=null,edColId=null,kbQ='';
 function filtKB(){kbQ=gv('kb-q').toLowerCase().trim();renderKB();}
 
 function renderKB(){
   const board=document.getElementById('kb');const cols=getCols();const ps=DB.get(K.p)||[];board.innerHTML='';
   
-  // Banner de Filtro Ativo
   const filterBanner = document.getElementById('kb-filter-banner');
   if (activeFilter) {
      let txt = '';
@@ -763,7 +763,6 @@ function renderKB(){
   }
 
   cols.forEach((col)=>{
-    // Aplicação dos filtros na hora de puxar os cards da coluna
     let cards = ps.filter(p=>(p.colId||cols[0].id)===col.id);
     
     if (activeFilter === 'hoje') cards = cards.filter(p => !p.entregue && isT(p.entrega));
@@ -772,8 +771,12 @@ function renderKB(){
     if (kbQ) cards = cards.filter(p => p.cliente.toLowerCase().includes(kbQ) || p.desc.toLowerCase().includes(kbQ));
 
     const tot=cards.reduce((a,p)=>a+Number(p.valor||0),0);
-    const ce=document.createElement('div');ce.className='kc';
-    const hdr=document.createElement('div');hdr.className='kch';
+    const ce=document.createElement('div');
+    ce.className='kc';
+    ce.dataset.colId = col.id; // Marca a coluna para o SortableJS de Colunas
+    
+    const hdr=document.createElement('div');
+    hdr.className='kch';
     hdr.innerHTML=`<span class="cn${!col.fixa?' ed':''}" ${!col.fixa?`ondblclick="abrRnc('${col.id}')"`:''}>${col.nome}</span><div class="cm2"><span class="cb">${cards.length}</span>${tot>0?`<span class="ct">${brl(tot)}</span>`:''} ${!col.fixa?`<button class="bc" onclick="delCol('${col.id}')">✕</button>`:''}</div>`;
     ce.appendChild(hdr);
     
@@ -792,8 +795,27 @@ function renderKB(){
     });
     ce.appendChild(body);board.appendChild(ce);
   });
+  
+  // Botão de Nova Coluna
   const btn=document.createElement('button');btn.className='bnc';btn.innerHTML='+';btn.onclick=()=>{document.getElementById('ncn').value='';OM('mnc');};board.appendChild(btn);
 
+  // 1. INICIALIZA O "ARRASTAR" PARA AS COLUNAS (Efeito Trello)
+  new Sortable(board, {
+    animation: 150,
+    draggable: '.kc', // Só permite arrastar as colunas (ignora o botão +)
+    handle: '.kch',   // Só arrasta se pegar pelo cabeçalho
+    filter: '.bc',    // Não ativa o drag se clicar no X de apagar a coluna
+    ghostClass: 'sortable-ghost',
+    onEnd: function (evt) {
+      // Quando soltar a coluna, salva a nova ordem no banco
+      const newOrderIds = Array.from(board.querySelectorAll('.kc')).map(el => el.dataset.colId);
+      const oldCols = getCols();
+      const newCols = newOrderIds.map(id => oldCols.find(c => c.id === id)).filter(Boolean);
+      DB.set(K.col, newCols);
+    }
+  });
+
+  // 2. INICIALIZA O "ARRASTAR" PARA OS CARDS (Já existia)
   document.querySelectorAll('.kcb').forEach(el => {
     new Sortable(el, {
       group: 'kanban',
@@ -820,7 +842,6 @@ function addCard(){
   ps.unshift({id:uid(),colId:cols[0].id,cliente:cli,desc,valor:Number(gv('ifv')||0),sinal:Number(gv('ifs')||0),tel:tel,entrega:gv('ife'),data:hj(),pago:false,entregue:false});
   DB.set(K.p,ps);
   
-  // AUTO-SAVE EM CLIENTES
   const cls=DB.get(K.cl)||[];
   if(!cls.some(c=>c.nome.toLowerCase()===cli.toLowerCase())){
     cls.unshift({id:uid(),nome:cli,tel:tel,cidade:''});
