@@ -177,7 +177,6 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 /* KANBAN BOARD */
 #kbs{padding-top:5px}#cs{display:none;padding-top:5px}
-
 #kb { display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; cursor: grab;}
 #kb:active { cursor: grabbing;}
 
@@ -258,7 +257,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v11.0 · Smart Pay</div>
+  <div class="sb-foot">v11.1 · BugFix & DB Seguro</div>
 </div>
 
 <div id="main">
@@ -758,12 +757,17 @@ function addCard(){
   if(sinalVal > 0) {
       sVId = 'v_' + uid();
       const vs = DB.get(K.v) || [];
-      vs.unshift({id: sVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Sinal de Pedido', qtd: 1, total: sinalVal, pgto: sinalPgto, data: hj()});
+      vs.unshift({id: sVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Vendas', qtd: 1, total: sinalVal, pgto: sinalPgto, data: hj()});
       DB.set(K.v, vs);
   }
 
   const ps=DB.get(K.p)||[]; 
-  ps.unshift({id:uid(),colId:getCols()[0].id,cliente:cli,desc,valor:valTotal,sinal:sinalVal,tel:tel,entrega:gv('ife'),data:hj(),pago:false,entregue:false, sinalVId: sVId});
+  // FIX CRÍTICO: Prevenindo undefined indo pro Firebase com "|| null"
+  ps.unshift({
+      id: uid(), colId: getCols()[0].id, cliente: cli, desc: desc, valor: valTotal, sinal: sinalVal, tel: tel, 
+      entrega: gv('ife'), data: hj(), pago: false, entregue: false, 
+      sinalVId: sVId || null, restVId: null
+  });
   DB.set(K.p,ps);
   
   document.getElementById('ifc').value='';document.getElementById('ifd').value='';document.getElementById('ifv').value='';document.getElementById('ifs').value='';document.getElementById('ift').value='';document.getElementById('ife').value='';
@@ -777,6 +781,7 @@ function abrModal(id){
   let wa=num.length>=10?`<a href="https://wa.me/55${num}" target="_blank" style="background:#25D366;color:#fff;padding:3px 10px;border-radius:10px;text-decoration:none;font-size:0.7rem;font-weight:bold;margin-left:10px;">💬 WhatsApp</a>`:'';
   document.getElementById('mpif').innerHTML=`<div style="font-weight:bold;font-size:1.05rem;color:var(--pd);margin-bottom:6px;display:flex;align-items:center;">${p.cliente} ${wa}</div><strong>Descrição:</strong> ${p.desc}`;
   sv('mptot',brl(p.valor)); sv('mpsin',brl(p.sinal)); sv('mprest',brl(Number(p.valor)-Number(p.sinal)));
+  
   document.getElementById('mppg').checked=!!p.pago; document.getElementById('mpeg').checked=!!p.entregue;
   OM('mped');
 }
@@ -802,7 +807,7 @@ function togF(f){
               let vs = DB.get(K.v) || [];
               vs = vs.filter(v => v.id !== p.restVId);
               DB.set(K.v, vs);
-              delete p.restVId;
+              p.restVId = null; // FIX CRÍTICO: Prevenindo undefined
           }
       }
   }
@@ -856,7 +861,7 @@ function salvarEd(){
       if(vi !== -1) { vs[vi].total = novoSinal; vs[vi].cliente = cli; vs[vi].produto = 'Sinal - ' + desc; vs[vi].pgto = sinalPgto; }
   } else if (novoSinal > 0) {
       p.sinalVId = 'v_' + uid();
-      vs.unshift({id: p.sinalVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Sinal de Pedido', qtd: 1, total: novoSinal, pgto: sinalPgto, data: hj()});
+      vs.unshift({id: p.sinalVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Vendas', qtd: 1, total: novoSinal, pgto: sinalPgto, data: hj()});
   }
   
   if(p.restVId) {
@@ -904,8 +909,13 @@ function confLV(){
       if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-qtdAbatida);DB.set(K.e,es);}
   }
   
+  // FIX CRÍTICO: Prevenindo undefined indo pro Firebase com "|| null"
   const co=DB.get(K.co)||[]; 
-  co.unshift({id:uid(),cliente:ped.cliente,desc:ped.desc,valor:ped.valor,dataConc:hj(), sinalVId: ped.sinalVId, restVId: ped.restVId, pedOriginal: ped, estId: estId, qtdEst: qtdAbatida});
+  co.unshift({
+      id:uid(), cliente:ped.cliente, desc:ped.desc, valor:ped.valor, dataConc:hj(), 
+      sinalVId: ped.sinalVId || null, restVId: ped.restVId || null, 
+      pedOriginal: ped, estId: estId || null, qtdEst: qtdAbatida || 0
+  });
   
   DB.set(K.co,co); ps.splice(i,1); DB.set(K.p,ps); CM('mlv'); atualizarKanbanEAlertas(); toast("✅ Pedido Finalizado e Arquivado!");
 }
@@ -928,7 +938,7 @@ function desfazerConc(id) {
         
         const ps = DB.get(K.p) || [];
         if(item.pedOriginal) { ps.unshift(item.pedOriginal); } 
-        else { ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: '', data: hj(), pago: true, entregue: false}); }
+        else { ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: '', data: hj(), pago: true, entregue: false, sinalVId: null, restVId: null}); }
         DB.set(K.p, ps);
         
         if(item.estId) {
@@ -942,7 +952,7 @@ function desfazerConc(id) {
 
 function delConc(id){conf('Excluir registro permanentemente?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
-// ── 6. VENDAS MANUAIS (Proteção de Vínculo do Kanban) ──
+// ── 6. VENDAS MANUAIS ──
 function calcV(){document.getElementById('vt').value=(Number(gv('vu')||0)*Number(gv('vq')||1)).toFixed(2);}
 function salvarV(){
   const p=gv('vp').trim();if(!p)return toast('Preencha o produto!',true);
