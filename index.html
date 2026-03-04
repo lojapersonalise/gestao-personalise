@@ -177,7 +177,6 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 /* KANBAN BOARD */
 #kbs{padding-top:5px}#cs{display:none;padding-top:5px}
-
 #kb { display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; cursor: grab;}
 #kb:active { cursor: grabbing;}
 
@@ -258,7 +257,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v10.2 · Desfazer Conclusão</div>
+  <div class="sb-foot">v10.3 · Financeiro Auto</div>
 </div>
 
 <div id="main">
@@ -266,7 +265,7 @@ input:checked+.sl:before{transform:translateX(19px)}
 <div id="p0" class="pg">
   <h2 class="ttl">📊 Dashboard</h2>
   <div class="cx-row">
-    <div class="cx g"><span class="lb">Entrou hoje</span><span class="vl" id="cxe">R$ 0,00</span><span class="sb2" id="cxeq">0 vendas</span></div>
+    <div class="cx g"><span class="lb">Entrou hoje</span><span class="vl" id="cxe">R$ 0,00</span><span class="sb2" id="cxeq">0 recebimentos</span></div>
     <div class="cx r"><span class="lb">Saiu hoje</span><span class="vl" id="cxs">R$ 0,00</span><span class="sb2" id="cxsq">0 despesas</span></div>
     <div class="cx b"><span class="lb">Saldo do dia</span><span class="vl" id="cxd">R$ 0,00</span><span class="sb2">resultado</span></div>
     <div class="cx"><span class="lb">Total do mês</span><span class="vl" id="cxm">R$ 0,00</span><span class="sb2" id="cxmq">–</span></div>
@@ -424,15 +423,15 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 </div></div><div id="toast"></div>
 
-<div class="mo" id="mnp"><div class="mb"><div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome" list="ifcl" autocomplete="off"/><datalist id="ifcl"></datalist></div><div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas..."></textarea></div><div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" step="0.01"/></div><div class="fg"><label>Sinal (R$)</label><input id="ifs" type="number" step="0.01"/></div><div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="(DDD) Número"/></div><div class="fg"><label>Entrega</label><input id="ife" type="date"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button><button class="btn bp sm" onclick="addCard()">➕ Adicionar</button></div></div></div>
+<div class="mo" id="mnp"><div class="mb"><div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome" list="ifcl" autocomplete="off"/><datalist id="ifcl"></datalist></div><div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas..."></textarea></div><div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" step="0.01"/></div><div class="fg"><label>Sinal recebido (R$)</label><input id="ifs" type="number" step="0.01"/></div><div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="(DDD) Número"/></div><div class="fg"><label>Entrega</label><input id="ife" type="date"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button><button class="btn bp sm" onclick="addCard()">➕ Adicionar</button></div></div></div>
 
-<div class="mo" id="mped"><div class="mb"><div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div><div class="my"><div class="ib" id="mpif"></div><div class="fr"><div class="fi"><label>Total</label><p id="mptot">–</p></div><div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div><div class="fi"><label>Restante</label><p id="mprest">–</p></div></div><div class="tr2"><div><div class="tl2">💳 Pago</div></div><label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label></div><div class="tr2"><div><div class="tl2">📦 Entregue</div></div><label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label></div></div><div class="mf"><button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button><button class="btn out sm" onclick="editPA()">✏️ Editar</button><button class="btn bs sm" onclick="abrirLV()">💰 Lançar Venda</button></div></div></div>
+<div class="mo" id="mped"><div class="mb"><div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div><div class="my"><div class="ib" id="mpif"></div><div class="fr"><div class="fi"><label>Total</label><p id="mptot">–</p></div><div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div><div class="fi"><label>Restante</label><p id="mprest">–</p></div></div><div class="tr2"><div><div class="tl2">💳 Pago</div></div><label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label></div><div class="tr2"><div><div class="tl2">📦 Entregue</div></div><label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label></div></div><div class="mf"><button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button><button class="btn out sm" onclick="editPA()">✏️ Editar</button><button class="btn bs sm" onclick="abrirLV()">📦 Finalizar / Arquivar</button></div></div></div>
 
 <div class="mo" id="mhc"><div class="mb" style="max-width:600px"><div class="mh"><h3 id="mhctt">👁️ Histórico</h3><button class="mc" onclick="CM('mhc')">✕</button></div><div class="my"><div class="tc" style="box-shadow:none; padding:0;"><table style="min-width:auto;"><thead><tr><th>Data</th><th>Desc</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbhc"></tbody></table></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button></div></div></div>
 
-<div class="mo" id="mlv"><div class="mb" style="max-width:430px"><div class="mh" style="color:var(--ok)"><h3>💰 Confirmar Venda</h3><button class="mc" onclick="CM('mlv')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg fl"><label>Produto</label><input id="lvp" type="text"/></div><div class="fg"><label>Categoria</label><select id="lvcat"><option>Camisetas</option><option>Canecas</option><option>Agendas</option><option>Cadernos</option><option>Etiquetas</option><option>Outros</option></select></div><div class="fg"><label>Valor</label><input id="lvt" type="number" step="0.01"/></div><div class="fg"><label>Pgto</label><select id="lvpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Fiado</option></select></div><div class="fg"><label>Data</label><input id="lvd" type="date"/></div><div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="document.getElementById('lvqw').style.display=this.value?'block':'none'"><option value="">— Não abater —</option></select></div><div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button><button class="btn bs sm" onclick="confLV()">✅ Confirmar</button></div></div></div>
+<div class="mo" id="mlv"><div class="mb" style="max-width:430px"><div class="mh" style="color:var(--ok)"><h3>📦 Finalizar e Arquivar</h3><button class="mc" onclick="CM('mlv')">✕</button></div><div class="my"><p style="font-size:.82rem;margin-bottom:12px;color:var(--tl)">O pedido irá para os <strong>Concluídos</strong>. Os recebimentos (Sinal e Pagamento) são lançados automaticamente na aba Vendas.</p><div class="fg-grid" style="gap:9px"><div class="fg fl" style="display:none;"><label>Produto</label><input id="lvp" type="text"/></div><div class="fg" style="display:none;"><label>Valor pendente a lançar (R$)</label><input id="lvt" type="number" step="0.01"/></div><div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="document.getElementById('lvqw').style.display=this.value?'block':'none'"><option value="">— Não abater —</option></select></div><div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button><button class="btn bs sm" onclick="confLV()">✅ Arquivar Pedido</button></div></div></div>
 
-<div class="mo" id="mep"><div class="mb"><div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div><div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div><div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div><div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" step="0.01"/></div><div class="fg"><label>Sinal (R$)</label><input id="eps" type="number" step="0.01"/></div><div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button><button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button></div></div></div>
+<div class="mo" id="mep"><div class="mb"><div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div><div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div><div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div><div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" step="0.01"/></div><div class="fg"><label>Sinal recebido (R$)</label><input id="eps" type="number" step="0.01"/></div><div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button><button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button></div></div></div>
 
 <div class="mo" id="mnc"><div class="sm-box"><h3>➕ Nova Coluna</h3><input id="ncn" type="text" placeholder="Nome..." maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mnc')">Cancelar</button><button class="btn bp sm" onclick="criarCol()">✅ Criar</button></div></div></div>
 <div class="mo" id="mrc"><div class="sm-box"><h3>✏️ Renomear Coluna</h3><input id="rcn" type="text" maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mrc')">Cancelar</button><button class="btn bp sm" onclick="renCol()">✅ Salvar</button></div></div></div>
@@ -612,19 +611,21 @@ let CHS={};
 function buildDash(){
   const d=hj(),mes=d.slice(0,7);
   const vs=DB.get(K.v)||[],cs=DB.get(K.c)||[],ps=DB.get(K.p)||[],es=DB.get(K.e)||[];
+  
+  // O Caixa reflete exatamente as Vendas registradas (que agora incluem os Sinais e os Pagamentos automáticos)
   const vH=vs.filter(v=>v.data===d),cH=cs.filter(c=>c.data===d);
   const ent=vH.reduce((a,v)=>a+Number(v.total||0),0),sai=cH.reduce((a,c)=>a+Number(c.valor||0),0),sal=ent-sai;
   
   const vM=vs.filter(v=>v.data.startsWith(mes)),cM=cs.filter(c=>c.data.startsWith(mes));
   const fat=vM.reduce((a,b)=>a+Number(b.total),0), custos=cM.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
 
-  sv('cxe',brl(ent));sv('cxeq',vH.length+' vendas');sv('cxs',brl(sai));sv('cxsq',cH.length+' despesas');
+  sv('cxe',brl(ent));sv('cxeq',vH.length+' recebimentos');sv('cxs',brl(sai));sv('cxsq',cH.length+' despesas');
   const se=document.getElementById('cxd');if(se){se.textContent=brl(sal);se.style.color=sal>=0?'var(--ok)':'var(--no)';}
-  sv('cxm',brl(fat));sv('cxmq',vM.length+' vendas no mês');
+  sv('cxm',brl(fat));sv('cxmq',vM.length+' lançamentos no mês');
 
-  sv('dv',brl(fat));sv('dvq',vM.length+' vendas');sv('dc',brl(custos));sv('dcq',cM.length+' compras');
+  sv('dv',brl(fat));sv('dvq',vM.length+' vendas/sinais');sv('dc',brl(custos));sv('dcq',cM.length+' compras');
   const dl=document.getElementById('dl');if(dl){dl.textContent=brl(fat-custos);dl.style.color=(fat-custos)>=0?'var(--ok)':'var(--no)';}
-  sv('dp',ps.filter(p=>!p.entregue).length);sv('de',es.length);
+  sv('dp',ps.filter(p=>!p.entregue).length);
   
   const ms=[],lbM=[];
   for(let i=5;i>=0;i--){const mDt=new Date(new Date().getFullYear(),new Date().getMonth()-i,1);ms.push(mDt.toISOString().slice(0,7));lbM.push(mDt.toLocaleDateString('pt-BR',{month:'short'}));}
@@ -636,7 +637,7 @@ function buildDash(){
   CHS['ch2']=new Chart(document.getElementById('ch2').getContext('2d'),{type:'pie',data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:['#784A91','#9b6bb5','#b892cc','#5a3570','#c9a0e0','#3f51b5']}]},options:{responsive:true,maintainAspectRatio:false}});
 }
 
-// ── 5. KANBAN (PEDIDOS) ──
+// ── 5. KANBAN E INTELIGÊNCIA FINANCEIRA ──
 function atualizarKanbanEAlertas() { buildAlerts(); renderKB(); }
 
 function buildAlerts(){
@@ -708,13 +709,27 @@ function stab(show,hide,el){
 
 function addCard(){
   let cli=gv('ifc').trim(), desc=gv('ifd').trim(), tel=gv('ift').trim();
+  let valTotal = Number(gv('ifv')||0), sinalVal = Number(gv('ifs')||0);
   if(!cli||!desc) return toast("Preencha cliente e descrição!", true);
+  
   const cls=DB.get(K.cl)||[]; let cleanTel=tel.replace(/\D/g,'');
   let ex=cleanTel?cls.find(c=>c.tel&&c.tel.replace(/\D/g,'')===cleanTel):cls.find(c=>c.nome.toLowerCase()===cli.toLowerCase());
   if(ex) cli=ex.nome;
   else { cls.unshift({id:uid(),nome:cli,tel:tel,cidade:''}); DB.set(K.cl,cls); updDL(); }
-  const ps=DB.get(K.p)||[]; ps.unshift({id:uid(),colId:getCols()[0].id,cliente:cli,desc,valor:Number(gv('ifv')||0),sinal:Number(gv('ifs')||0),tel:tel,entrega:gv('ife'),data:hj(),pago:false,entregue:false});
+  
+  // LANÇAMENTO AUTOMÁTICO DO SINAL
+  let sVId = null;
+  if(sinalVal > 0) {
+      sVId = 'v_' + uid();
+      const vs = DB.get(K.v) || [];
+      vs.unshift({id: sVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Sinal de Pedido', qtd: 1, total: sinalVal, pgto: 'PIX', data: hj()});
+      DB.set(K.v, vs);
+  }
+
+  const ps=DB.get(K.p)||[]; 
+  ps.unshift({id:uid(),colId:getCols()[0].id,cliente:cli,desc,valor:valTotal,sinal:sinalVal,tel:tel,entrega:gv('ife'),data:hj(),pago:false,entregue:false, sinalVId: sVId});
   DB.set(K.p,ps);
+  
   document.getElementById('ifc').value='';document.getElementById('ifd').value='';document.getElementById('ifv').value='';document.getElementById('ifs').value='';document.getElementById('ift').value='';document.getElementById('ife').value='';
   CM('mnp'); atualizarKanbanEAlertas(); toast("Pedido Adicionado!");
 }
@@ -726,6 +741,7 @@ function abrModal(id){
   let wa=num.length>=10?`<a href="https://wa.me/55${num}" target="_blank" style="background:#25D366;color:#fff;padding:3px 10px;border-radius:10px;text-decoration:none;font-size:0.7rem;font-weight:bold;margin-left:10px;">💬 WhatsApp</a>`:'';
   document.getElementById('mpif').innerHTML=`<div style="font-weight:bold;font-size:1.05rem;color:var(--pd);margin-bottom:6px;display:flex;align-items:center;">${p.cliente} ${wa}</div><strong>Descrição:</strong> ${p.desc}`;
   sv('mptot',brl(p.valor)); sv('mpsin',brl(p.sinal)); sv('mprest',brl(Number(p.valor)-Number(p.sinal)));
+  sv('mppstat',p.pago?'✅ Pago':'💳 Pendente');
   document.getElementById('mppg').checked=!!p.pago; document.getElementById('mpeg').checked=!!p.entregue;
   OM('mped');
 }
@@ -733,22 +749,82 @@ function abrModal(id){
 function togF(f){
   const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return;
   const isC=document.getElementById(f==='pago'?'mppg':'mpeg').checked;
-  ps[i][f]=isC; DB.set(K.p,ps); abrModal(actPed); atualizarKanbanEAlertas();
-  if(f==='pago'&&activeFilter==='pagamento'&&isC) toast('Ocultado do filtro de devedores');
-  else if(f==='entregue'&&(activeFilter==='hoje'||activeFilter==='atraso')&&isC) toast('Ocultado do filtro');
+  let p = ps[i];
+  
+  // LANÇAMENTO AUTOMÁTICO DO PAGAMENTO RESTANTE
+  if(f === 'pago') {
+      if(isC && !p.pago) {
+          let rest = Number(p.valor||0) - Number(p.sinal||0);
+          if(rest > 0) {
+              let rId = 'v_' + uid();
+              const vs = DB.get(K.v) || [];
+              vs.unshift({id: rId, cliente: p.cliente, produto: 'Restante - ' + p.desc, categoria: 'Vendas', qtd: 1, total: rest, pgto: 'PIX', data: hj()});
+              DB.set(K.v, vs);
+              p.restVId = rId;
+          }
+      } else if (!isC && p.pago) {
+          // Desmarcou o pagamento: cancela a venda do restante
+          if(p.restVId) {
+              let vs = DB.get(K.v) || [];
+              vs = vs.filter(v => v.id !== p.restVId);
+              DB.set(K.v, vs);
+              delete p.restVId;
+          }
+      }
+  }
+
+  p[f]=isC; DB.set(K.p,ps); abrModal(actPed); atualizarKanbanEAlertas();
+  if(f==='pago'&&activeFilter==='pagamento'&&isC) toast('Pago! (Ocultado dos devedores)');
+  else if(f==='entregue'&&(activeFilter==='hoje'||activeFilter==='atraso')&&isC) toast('Entregue! (Ocultado das pendências)');
   else toast('Status atualizado!');
 }
 
-function delPA(){CM('mped');conf('Excluir pedido?',()=>{DB.set(K.p,DB.get(K.p).filter(p=>p.id!==actPed));atualizarKanbanEAlertas();toast('Excluído!');});}
+function delPA(){
+    CM('mped');
+    conf('Excluir pedido definitivamente?',()=>{
+        const ps=DB.get(K.p); const p=ps.find(x=>x.id===actPed);
+        if(p) {
+            // Limpa as vendas financeiras associadas
+            let vs = DB.get(K.v) || [];
+            if(p.sinalVId) vs = vs.filter(v => v.id !== p.sinalVId);
+            if(p.restVId) vs = vs.filter(v => v.id !== p.restVId);
+            DB.set(K.v, vs);
+        }
+        DB.set(K.p,DB.get(K.p).filter(p=>p.id!==actPed));
+        atualizarKanbanEAlertas(); toast('Excluído!');
+    });
+}
+
 function editPA(){
   const p=DB.get(K.p).find(x=>x.id===actPed);if(!p)return;
   document.getElementById('epc').value=p.cliente;document.getElementById('ept').value=p.tel||'';document.getElementById('epe').value=p.entrega||'';document.getElementById('epv').value=p.valor;document.getElementById('eps').value=p.sinal||0;document.getElementById('epd').value=p.desc;
   CM('mped');OM('mep');
 }
+
 function salvarEd(){
   const cli=gv('epc').trim(),desc=gv('epd').trim();if(!cli||!desc)return toast('Preencha os campos!',true);
   const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;
-  ps[i]={...ps[i],cliente:cli,tel:gv('ept').trim(),entrega:gv('epe'),valor:Number(gv('epv')||0),sinal:Number(gv('eps')||0),desc};
+  let p = ps[i];
+  let novoSinal = Number(gv('eps')||0);
+  let novoValor = Number(gv('epv')||0);
+  
+  // Atualiza as Vendas se houver edição
+  let vs = DB.get(K.v) || [];
+  if(p.sinalVId) {
+      let vi = vs.findIndex(v => v.id === p.sinalVId);
+      if(vi !== -1) { vs[vi].total = novoSinal; vs[vi].cliente = cli; vs[vi].produto = 'Sinal - ' + desc; }
+  } else if (novoSinal > 0) {
+      p.sinalVId = 'v_' + uid();
+      vs.unshift({id: p.sinalVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Sinal de Pedido', qtd: 1, total: novoSinal, pgto: 'PIX', data: hj()});
+  }
+  
+  if(p.restVId) {
+      let vi = vs.findIndex(v => v.id === p.restVId);
+      if(vi !== -1) { vs[vi].total = novoValor - novoSinal; vs[vi].cliente = cli; vs[vi].produto = 'Restante - ' + desc; }
+  }
+  DB.set(K.v, vs);
+
+  ps[i]={...p,cliente:cli,tel:gv('ept').trim(),entrega:gv('epe'),valor:novoValor,sinal:novoSinal,desc};
   DB.set(K.p,ps);CM('mep');atualizarKanbanEAlertas();toast('Editado!');
 }
 
@@ -757,41 +833,47 @@ function abrRnc(id){edColId=id;const col=getCols().find(c=>c.id===id);document.g
 function renCol(){const n=gv('rcn').trim();if(n&&edColId){const c=getCols();const i=c.findIndex(x=>x.id===edColId);if(i!==-1)c[i].nome=n;DB.set(K.col,c);CM('mrc');atualizarKanbanEAlertas();}}
 function delCol(id){if(DB.get(K.p).some(p=>(p.colId||getCols()[0].id)===id))return toast('Mova os pedidos antes!',true);conf('Excluir coluna?',()=>{DB.set(K.col,getCols().filter(c=>c.id!==id));atualizarKanbanEAlertas();});}
 
-// Lançar Venda E DESFAZER
+// FINALIZAR / ARQUIVAR VENDA
 function abrirLV(){
   const p=DB.get(K.p).find(x=>x.id===actPed); if(!p) return;
-  document.getElementById('lvp').value=p.desc; document.getElementById('lvt').value=p.valor; document.getElementById('lvd').value=hj();
+  document.getElementById('lvp').value=p.desc; 
   
-  // Popula os estoques na listagem
+  // Calcula o que falta lançar se ele ainda não marcou como pago
+  let valPendente = 0;
+  if(!p.pago) valPendente = Number(p.valor||0) - Number(p.sinal||0);
+  document.getElementById('lvt').value = valPendente.toFixed(2);
+  
   const sel=document.getElementById('lvest');
   sel.innerHTML=`<option value="">— Não abater —</option>`+(DB.get(K.e)||[]).map(e=>`<option value="${e.id}">${e.nome}</option>`).join('');
   document.getElementById('lvqw').style.display='none';
   document.getElementById('lvq').value='1';
-  
   CM('mped'); OM('mlv');
 }
 
 function confLV(){
   const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return; const ped=ps[i];
-  const vId = uid(); // ID da nova venda para linkar
+  const lvtVal = Number(gv('lvt')||0);
+  let vId = null;
   
-  const vs=DB.get(K.v)||[]; 
-  vs.unshift({id:vId,cliente:ped.cliente,produto:gv('lvp'),categoria:gv('lvcat'),qtd:1,total:Number(gv('lvt')),pgto:gv('lvpg'),data:gv('lvd')||hj()});
+  // Se sobrou algum valor pra lançar que o usuário não marcou antes
+  if(lvtVal > 0) {
+      vId = 'v_' + uid();
+      const vs=DB.get(K.v)||[]; 
+      vs.unshift({id:vId,cliente:ped.cliente,produto:gv('lvp'),categoria:gv('lvcat'),qtd:1,total:lvtVal,pgto:gv('lvpg'),data:gv('lvd')||hj()});
+      DB.set(K.v,vs);
+  }
   
-  const estId=gv('lvest');
-  let qtdAbatida = 0;
+  const estId=gv('lvest'); let qtdAbatida = 0;
   if(estId){
       qtdAbatida = Number(gv('lvq')||1);
       const es=DB.get(K.e);const ei=es.findIndex(e=>e.id===estId);
       if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-qtdAbatida);DB.set(K.e,es);}
   }
   
-  // Salva o "Backup" do pedido dentro do Concluídos para poder desfazer depois
   const co=DB.get(K.co)||[]; 
-  co.unshift({id:uid(),cliente:ped.cliente,desc:ped.desc,valor:ped.valor,dataConc:hj(), vendaId: vId, pedOriginal: ped, estId: estId, qtdEst: qtdAbatida});
+  co.unshift({id:uid(),cliente:ped.cliente,desc:ped.desc,valor:ped.valor,dataConc:hj(), vendaId: vId, sinalVId: ped.sinalVId, restVId: ped.restVId, pedOriginal: ped, estId: estId, qtdEst: qtdAbatida});
   
-  DB.set(K.v,vs); DB.set(K.co,co); ps.splice(i,1); DB.set(K.p,ps); 
-  CM('mlv'); atualizarKanbanEAlertas(); toast("Venda Lançada e Arquivada!");
+  DB.set(K.co,co); ps.splice(i,1); DB.set(K.p,ps); CM('mlv'); atualizarKanbanEAlertas(); toast("✅ Pedido Finalizado e Arquivado!");
 }
 
 function renderConc(){
@@ -804,47 +886,32 @@ function renderConc(){
 }
 
 function desfazerConc(id) {
-    conf('Desfazer conclusão? O pedido volta ao Kanban e a Venda é cancelada.', () => {
+    conf('Desfazer conclusão? O pedido voltará para o Kanban.', () => {
         const co = DB.get(K.co) || [];
         const idx = co.findIndex(c => c.id === id);
         if (idx === -1) return;
         const item = co[idx];
         
-        // 1. Apaga a venda lá do painel de Vendas
+        // Apaga a venda lançada NA FINALIZAÇÃO (Os Sinais e Pagos são do card e vão voltar pro kanban intactos)
         if(item.vendaId) {
             let vs = DB.get(K.v) || [];
             vs = vs.filter(v => v.id !== item.vendaId);
             DB.set(K.v, vs);
         }
         
-        // 2. Devolve o card pro Kanban
         const ps = DB.get(K.p) || [];
-        if(item.pedOriginal) {
-            ps.unshift(item.pedOriginal);
-        } else {
-            ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: '', data: hj(), pago: false, entregue: false});
-        }
+        if(item.pedOriginal) { ps.unshift(item.pedOriginal); } 
+        else { ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: '', data: hj(), pago: false, entregue: false}); }
         DB.set(K.p, ps);
         
-        // 3. Devolve o estoque se tiver abatido
         if(item.estId) {
-            let es = DB.get(K.e) || [];
-            let ei = es.findIndex(e => e.id === item.estId);
-            if(ei !== -1) {
-                es[ei].qtd += (item.qtdEst || 1);
-                DB.set(K.e, es);
-            }
+            let es = DB.get(K.e) || []; let ei = es.findIndex(e => e.id === item.estId);
+            if(ei !== -1) { es[ei].qtd += (item.qtdEst || 1); DB.set(K.e, es); }
         }
         
-        // 4. Apaga da lista de concluidos
-        co.splice(idx, 1);
-        DB.set(K.co, co);
-        
-        renderConc();
-        toast('✅ Restaurado para o Kanban!');
+        co.splice(idx, 1); DB.set(K.co, co); renderConc(); toast('✅ Restaurado para o Kanban!');
     });
 }
-
 function delConc(id){conf('Excluir registro permanentemente?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
 // ── 6. VENDAS MANUAIS ──
