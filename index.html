@@ -177,6 +177,7 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 /* KANBAN BOARD */
 #kbs{padding-top:5px}#cs{display:none;padding-top:5px}
+
 #kb { display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; cursor: grab;}
 #kb:active { cursor: grabbing;}
 
@@ -257,7 +258,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v11.1 · BugFix & DB Seguro</div>
+  <div class="sb-foot">v11.2 · BugFix AutoFill</div>
 </div>
 
 <div id="main">
@@ -556,6 +557,8 @@ async function iniciarApp() {
       if(firstLoad) {
           loaded++;
           if(loaded === keys.length) {
+              // Carrega a listinha de clientes globalmente antes de tirar o loader
+              updDL(); 
               document.getElementById('loader').classList.add('off');
               goTo(1); 
               initDragToScroll(); 
@@ -572,11 +575,12 @@ async function iniciarApp() {
 }
 
 function atualizarTelaAtual() {
+  updDL(); // Garante que as listinhas do Datalist estejam sempre atualizadas
   const pages = ['p0','p1','p2','p3','p4','p5','p6'];
   const active = pages.find(p => document.getElementById(p).classList.contains('on'));
   if(active === 'p0') buildDash();
   if(active === 'p1') atualizarKanbanEAlertas();
-  if(active === 'p2') { renderV(); updDL(); }
+  if(active === 'p2') renderV();
   if(active === 'p3') renderC();
   if(active === 'p4') renderE();
   if(active === 'p5') renderCl();
@@ -596,7 +600,15 @@ function toast(m,e=false){const t=document.getElementById('toast');t.textContent
 function CM(id){document.getElementById(id).classList.remove('on')}
 function OM(id){document.getElementById(id).classList.add('on')}
 function conf(m,cb){document.getElementById('cfm').textContent=m;OM('mcf');document.getElementById('cfo').onclick=()=>{cb();CM('mcf')}}
-function updDL(){const cls=DB.get(K.cl);['vcl','ifcl'].forEach(id=>{const d=document.getElementById(id);if(d)d.innerHTML=cls.map(c=>`<option value="${c.nome}">`).join('')});}
+
+// FUNÇÃO GLOBAL DE ATUALIZAR DATALISTS (Caixinhas de sugestão)
+function updDL(){
+    const cls=DB.get(K.cl) || [];
+    ['vcl','ifcl'].forEach(id=>{
+        const d=document.getElementById(id);
+        if(d) d.innerHTML=cls.map(c=>`<option value="${c.nome}">`).join('');
+    });
+}
 
 function copiarTexto(e,t){ e.stopPropagation(); navigator.clipboard.writeText(t).then(()=>toast('📋 Copiado!')) }
 
@@ -611,9 +623,11 @@ document.querySelectorAll('.mo').forEach(m => { m.addEventListener('click', (e) 
 document.getElementById('vd').value = hj();
 document.getElementById('cd').value = hj();
 
+// PREENCHIMENTO AUTOMÁTICO INSTANTÂNEO (oninput)
 function autoFillTel() {
     const nomeDigitado = gv('ifc').trim().toLowerCase();
-    if (!nomeDigitado) return;
+    if (!nomeDigitado) { document.getElementById('ift').value = ''; return; } // Limpa se apagar o nome
+    
     const cls = DB.get(K.cl) || [];
     const ex = cls.find(c => c.nome.toLowerCase() === nomeDigitado);
     if (ex && ex.tel) {
@@ -627,7 +641,8 @@ function goTo(n){
   document.querySelectorAll('nav a').forEach(a=>a.classList.remove('on'));
   document.getElementById('p'+n).classList.add('on');
   document.getElementById('n'+n).classList.add('on');
-  if(n===0) buildDash(); if(n===1) atualizarKanbanEAlertas(); if(n===2){renderV();updDL();} if(n===3) renderC(); if(n===4) renderE(); if(n===5) renderCl(); if(n===6) { setRDates(); gerarR(); }
+  updDL(); // Atualiza listinhas sempre que mudar de tela
+  if(n===0) buildDash(); if(n===1) atualizarKanbanEAlertas(); if(n===2){renderV();} if(n===3) renderC(); if(n===4) renderE(); if(n===5) renderCl(); if(n===6) { setRDates(); gerarR(); }
 }
 
 let CHS={};
@@ -762,11 +777,10 @@ function addCard(){
   }
 
   const ps=DB.get(K.p)||[]; 
-  // FIX CRÍTICO: Prevenindo undefined indo pro Firebase com "|| null"
+  // FIX CRÍTICO APLICADO: Garantindo que nunca envie undefined
   ps.unshift({
-      id: uid(), colId: getCols()[0].id, cliente: cli, desc: desc, valor: valTotal, sinal: sinalVal, tel: tel, 
-      entrega: gv('ife'), data: hj(), pago: false, entregue: false, 
-      sinalVId: sVId || null, restVId: null
+      id:uid(), colId:getCols()[0].id, cliente:cli, desc:desc, valor:valTotal, sinal:sinalVal, tel:tel, 
+      entrega:gv('ife') || null, data:hj(), pago:false, entregue:false, sinalVId: sVId || null, restVId: null
   });
   DB.set(K.p,ps);
   
@@ -807,7 +821,7 @@ function togF(f){
               let vs = DB.get(K.v) || [];
               vs = vs.filter(v => v.id !== p.restVId);
               DB.set(K.v, vs);
-              p.restVId = null; // FIX CRÍTICO: Prevenindo undefined
+              p.restVId = null; // FIX CRÍTICO
           }
       }
   }
@@ -870,7 +884,7 @@ function salvarEd(){
   }
   DB.set(K.v, vs);
 
-  ps[i]={...p,cliente:cli,tel:gv('ept').trim(),entrega:gv('epe'),valor:novoValor,sinal:novoSinal,desc};
+  ps[i]={...p,cliente:cli,tel:gv('ept').trim(),entrega:gv('epe')||null,valor:novoValor,sinal:novoSinal,desc};
   DB.set(K.p,ps);CM('mep');atualizarKanbanEAlertas();toast('Editado!');
 }
 
@@ -891,17 +905,6 @@ function abrirLV(){
 function confLV(){
   const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return; const ped=ps[i];
   
-  if(!ped.pago) {
-     let rest = Number(ped.valor||0) - Number(ped.sinal||0);
-     if(rest > 0) {
-         ped.restVId = 'v_' + uid();
-         const vs = DB.get(K.v) || [];
-         vs.unshift({id: ped.restVId, cliente: ped.cliente, produto: 'Restante - ' + ped.desc, categoria: 'Vendas', qtd: 1, total: rest, pgto: 'PIX', data: hj()});
-         DB.set(K.v, vs);
-     }
-     ped.pago = true;
-  }
-
   const estId=gv('lvest'); let qtdAbatida = 0;
   if(estId){
       qtdAbatida = Number(gv('lvq')||1);
@@ -909,10 +912,10 @@ function confLV(){
       if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-qtdAbatida);DB.set(K.e,es);}
   }
   
-  // FIX CRÍTICO: Prevenindo undefined indo pro Firebase com "|| null"
+  // FIX CRÍTICO APLICADO
   const co=DB.get(K.co)||[]; 
   co.unshift({
-      id:uid(), cliente:ped.cliente, desc:ped.desc, valor:ped.valor, dataConc:hj(), 
+      id:uid(),cliente:ped.cliente,desc:ped.desc,valor:ped.valor,dataConc:hj(), 
       sinalVId: ped.sinalVId || null, restVId: ped.restVId || null, 
       pedOriginal: ped, estId: estId || null, qtdEst: qtdAbatida || 0
   });
@@ -938,7 +941,7 @@ function desfazerConc(id) {
         
         const ps = DB.get(K.p) || [];
         if(item.pedOriginal) { ps.unshift(item.pedOriginal); } 
-        else { ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: '', data: hj(), pago: true, entregue: false, sinalVId: null, restVId: null}); }
+        else { ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: null, data: hj(), pago: true, entregue: false, sinalVId: null, restVId: null}); }
         DB.set(K.p, ps);
         
         if(item.estId) {
