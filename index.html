@@ -257,7 +257,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v10.0 · DB Otimizado</div>
+  <div class="sb-foot">v10.1 · Full Forms</div>
 </div>
 
 <div id="main">
@@ -423,15 +423,109 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 </div></div><div id="toast"></div>
 
-<div class="mo" id="mnp"><div class="mb"><div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome" list="ifcl" autocomplete="off"/><datalist id="ifcl"></datalist></div><div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas..."></textarea></div><div class="fg"><label>Valor total</label><input id="ifv" type="number" step="0.01"/></div><div class="fg"><label>WhatsApp</label><input id="ift" type="text"/></div><div class="fg"><label>Entrega</label><input id="ife" type="date"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button><button class="btn bp sm" onclick="addCard()">➕ Adicionar</button></div></div></div>
+<div class="mo" id="mnp">
+  <div class="mb">
+    <div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div>
+    <div class="my">
+      <div class="fg-grid" style="gap:9px">
+        <div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome do cliente" list="ifcl" autocomplete="off"/><datalist id="ifcl"></datalist></div>
+        <div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas de cerâmica..."></textarea></div>
+        <div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" min="0" step="0.01"/></div>
+        <div class="fg"><label>Sinal (R$)</label><input id="ifs" type="number" min="0" step="0.01"/></div>
+        <div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="DDD + Número"/></div>
+        <div class="fg"><label>Data de Entrega</label><input id="ife" type="date"/></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button>
+      <button class="btn bp sm" onclick="addCard()">➕ Adicionar</button>
+    </div>
+  </div>
+</div>
 
-<div class="mo" id="mped"><div class="mb"><div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div><div class="my"><div class="ib" id="mpif"></div><div class="fr"><div class="fi"><label>Total</label><p id="mptot">–</p></div><div class="fi"><label>Status Pgto</label><p id="mppstat">–</p></div></div><div class="tr2"><div><div class="tl2">💳 Pago</div></div><label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label></div><div class="tr2"><div><div class="tl2">📦 Entregue</div></div><label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label></div></div><div class="mf"><button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button><button class="btn out sm" onclick="editPA()">✏️ Editar</button><button class="btn bs sm" onclick="abrirLV()">💰 Lançar Venda</button></div></div></div>
+<div class="mo" id="mped">
+  <div class="mb">
+    <div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div>
+    <div class="my">
+      <div class="ib" id="mpif"></div>
+      <div class="fr">
+        <div class="fi"><label>Total</label><p id="mptot">–</p></div>
+        <div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div>
+        <div class="fi"><label>Restante</label><p id="mprest">–</p></div>
+      </div>
+      <div class="tr2">
+        <div><div class="tl2">💳 Pago</div></div>
+        <label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label>
+      </div>
+      <div class="tr2">
+        <div><div class="tl2">📦 Entregue</div></div>
+        <label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button>
+      <button class="btn out sm" onclick="editPA()">✏️ Editar</button>
+      <button class="btn bs sm" onclick="abrirLV()">💰 Lançar Venda</button>
+    </div>
+  </div>
+</div>
 
-<div class="mo" id="mhc"><div class="mb" style="max-width:600px"><div class="mh"><h3 id="mhctt">👁️ Histórico</h3><button class="mc" onclick="CM('mhc')">✕</button></div><div class="my"><div class="tc" style="box-shadow:none; padding:0;"><table style="min-width:auto;"><thead><tr><th>Data</th><th>Desc</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbhc"></tbody></table></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button></div></div></div>
+<div class="mo" id="mhc">
+  <div class="mb" style="max-width:600px">
+    <div class="mh"><h3 id="mhctt">👁️ Histórico: Cliente</h3><button class="mc" onclick="CM('mhc')">✕</button></div>
+    <div class="my" style="padding:10px 0;">
+      <div class="tc" style="box-shadow:none; padding:0; margin:0;">
+        <table><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody id="tbhc"></tbody></table>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button>
+    </div>
+  </div>
+</div>
 
-<div class="mo" id="mlv"><div class="mb" style="max-width:430px"><div class="mh" style="color:var(--ok)"><h3>💰 Confirmar Venda</h3><button class="mc" onclick="CM('mlv')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg fl"><label>Produto</label><input id="lvp" type="text"/></div><div class="fg"><label>Valor</label><input id="lvt" type="number" step="0.01"/></div><div class="fg"><label>Pgto</label><select id="lvpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Fiado</option></select></div><div class="fg"><label>Data</label><input id="lvd" type="date"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button><button class="btn bs sm" onclick="confLV()">✅ Confirmar</button></div></div></div>
+<div class="mo" id="mlv">
+  <div class="mb" style="max-width:430px">
+    <div class="mh" style="color:var(--ok)"><h3>💰 Confirmar Venda</h3><button class="mc" onclick="CM('mlv')">✕</button></div>
+    <div class="my">
+      <p style="font-size:.82rem;margin-bottom:12px;color:var(--tl)">O card será arquivado em <strong>Concluídos</strong>.</p>
+      <div class="fg-grid" style="gap:9px">
+        <div class="fg fl"><label>Produto</label><input id="lvp" type="text"/></div>
+        <div class="fg"><label>Categoria</label><select id="lvcat"><option>Camisetas</option><option>Canecas</option><option>Agendas</option><option>Cadernos</option><option>Etiquetas</option><option>Outros</option></select></div>
+        <div class="fg"><label>Valor total</label><input id="lvt" type="number" step="0.01"/></div>
+        <div class="fg"><label>Pgto</label><select id="lvpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Fiado</option></select></div>
+        <div class="fg"><label>Data</label><input id="lvd" type="date"/></div>
+        <div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="document.getElementById('lvqw').style.display=this.value?'block':'none'"><option value="">— Não abater —</option></select></div>
+        <div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button>
+      <button class="btn bs sm" onclick="confLV()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
 
-<div class="mo" id="mep"><div class="mb"><div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div><div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div><div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div><div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" step="0.01"/></div><div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button><button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button></div></div></div>
+<div class="mo" id="mep">
+  <div class="mb">
+    <div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div>
+    <div class="my">
+      <div class="fg-grid" style="gap:9px">
+        <div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div>
+        <div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div>
+        <div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div>
+        <div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" min="0" step="0.01"/></div>
+        <div class="fg"><label>Sinal (R$)</label><input id="eps" type="number" min="0" step="0.01"/></div>
+        <div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button>
+      <button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
 
 <div class="mo" id="mnc"><div class="sm-box"><h3>➕ Nova Coluna</h3><input id="ncn" type="text" placeholder="Nome..." maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mnc')">Cancelar</button><button class="btn bp sm" onclick="criarCol()">✅ Criar</button></div></div></div>
 <div class="mo" id="mrc"><div class="sm-box"><h3>✏️ Renomear Coluna</h3><input id="rcn" type="text" maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mrc')">Cancelar</button><button class="btn bp sm" onclick="renCol()">✅ Salvar</button></div></div></div>
@@ -477,14 +571,12 @@ function fazerLogin() {
 function fazerLogout() { auth.signOut(); }
 
 // ── 2. SEPARAÇÃO DE DADOS NO FIREBASE E MIGRAÇÃO ──
-// Em vez de 1 documento gigante, usamos 7 documentos na coleção 'banco_personalise'
 const K = {p:'pedidos', co:'concluidos', col:'colunas', v:'vendas', c:'compras', e:'estoque', cl:'clientes'};
 let MEM = { [K.p]:[], [K.co]:[], [K.col]:[], [K.v]:[], [K.c]:[], [K.e]:[], [K.cl]:[] };
 let activeFilter = null; 
 let currentPageCl = 1;
 const ITEMS_PER_PAGE = 10;
 
-// Este é o motor que salva cada categoria em sua própria "gaveta" no Firebase
 const DB = {
   get: k => MEM[k] || [],
   set: (k, v) => {
@@ -509,7 +601,7 @@ let firstLoad = true;
 async function iniciarApp() {
   document.getElementById('loader').classList.remove('off'); 
   
-  // Script de Migração: Separa os dados velhos nos novos documentos (só roda 1 vez)
+  // Script de Migração
   try {
       const oldRef = fbDB.collection('loja').doc('dados_personalise');
       const oldSnap = await oldRef.get();
@@ -526,7 +618,6 @@ async function iniciarApp() {
       }
   } catch(e) { console.error("Erro na migração", e); }
 
-  // Abre 7 conexões em tempo real (1 para cada "gaveta")
   let loaded = 0;
   const keys = Object.values(K);
   
@@ -553,7 +644,6 @@ async function iniciarApp() {
               firstLoad = false;
           }
       } else {
-          // Atualiza as telas abertas em tempo real se outro PC fez uma mudança
           if (!docSnap.metadata.hasPendingWrites) atualizarTelaAtual();
       }
     }, (erro) => {
@@ -729,7 +819,6 @@ function abrModal(id){
   let wa=num.length>=10?`<a href="https://wa.me/55${num}" target="_blank" style="background:#25D366;color:#fff;padding:3px 10px;border-radius:10px;text-decoration:none;font-size:0.7rem;font-weight:bold;margin-left:10px;">💬 WhatsApp</a>`:'';
   document.getElementById('mpif').innerHTML=`<div style="font-weight:bold;font-size:1.05rem;color:var(--pd);margin-bottom:6px;display:flex;align-items:center;">${p.cliente} ${wa}</div><strong>Descrição:</strong> ${p.desc}`;
   sv('mptot',brl(p.valor)); sv('mpsin',brl(p.sinal)); sv('mprest',brl(Number(p.valor)-Number(p.sinal)));
-  sv('mppstat',p.pago?'✅ Pago':'💳 Pendente');
   document.getElementById('mppg').checked=!!p.pago; document.getElementById('mpeg').checked=!!p.entregue;
   OM('mped');
 }
@@ -769,7 +858,10 @@ function abrirLV(){
 }
 function confLV(){
   const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return;
-  const vs=DB.get(K.v)||[]; vs.unshift({id:uid(),cliente:ps[i].cliente,produto:gv('lvp'),categoria:'Outros',qtd:1,total:Number(gv('lvt')),pgto:gv('lvpg'),data:gv('lvd')||hj()});
+  const vs=DB.get(K.v)||[]; vs.unshift({id:uid(),cliente:ps[i].cliente,produto:gv('lvp'),categoria:gv('lvcat'),qtd:1,total:Number(gv('lvt')),pgto:gv('lvpg'),data:gv('lvd')||hj()});
+  
+  const estId=gv('lvest');if(estId){const es=DB.get(K.e);const ei=es.findIndex(e=>e.id===estId);if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-Number(gv('lvq')||1));DB.set(K.e,es);}}
+  
   const co=DB.get(K.co)||[]; co.unshift({id:uid(),cliente:ps[i].cliente,desc:ps[i].desc,valor:ps[i].valor,dataConc:hj()});
   DB.set(K.v,vs); DB.set(K.co,co); ps.splice(i,1); DB.set(K.p,ps); CM('mlv'); atualizarKanbanEAlertas(); toast("Venda Lançada e Arquivada!");
 }
