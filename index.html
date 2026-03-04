@@ -126,7 +126,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--p)}
 textarea{resize:vertical;min-height:56px}
 .btn{padding:7px 15px;border:none;border-radius:7px;font-size:.84rem;font-weight:700;cursor:pointer;transition:background .18s;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:5px;}
 .bp{background:var(--p);color:#fff}.bp:hover{background:var(--pd)}
-.bs{background:var(--ok);color:#fff}.bd{background:var(--no);color:#fff}.bw{background:var(--wa);color:#fff}
+.bs{background:var(--ok);color:#fff}.bd{background:var(--no);color:#fff}.bw{background:var(--wa);color:#fff}.bw:hover{background:#e65100}
 .btn.out{background:transparent;border:2px solid var(--p);color:var(--p)}.btn.out:hover{background:var(--px)}
 .sm{padding:4px 10px;font-size:.74rem}
 .fa{margin-top:12px;display:flex;gap:7px;flex-wrap:wrap}
@@ -177,6 +177,7 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 /* KANBAN BOARD */
 #kbs{padding-top:5px}#cs{display:none;padding-top:5px}
+
 #kb { display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; cursor: grab;}
 #kb:active { cursor: grabbing;}
 
@@ -257,7 +258,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v10.1 · Full Forms</div>
+  <div class="sb-foot">v10.2 · Desfazer Conclusão</div>
 </div>
 
 <div id="main">
@@ -423,109 +424,15 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 </div></div><div id="toast"></div>
 
-<div class="mo" id="mnp">
-  <div class="mb">
-    <div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div>
-    <div class="my">
-      <div class="fg-grid" style="gap:9px">
-        <div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome do cliente" list="ifcl" autocomplete="off"/><datalist id="ifcl"></datalist></div>
-        <div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas de cerâmica..."></textarea></div>
-        <div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" min="0" step="0.01"/></div>
-        <div class="fg"><label>Sinal (R$)</label><input id="ifs" type="number" min="0" step="0.01"/></div>
-        <div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="DDD + Número"/></div>
-        <div class="fg"><label>Data de Entrega</label><input id="ife" type="date"/></div>
-      </div>
-    </div>
-    <div class="mf">
-      <button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button>
-      <button class="btn bp sm" onclick="addCard()">➕ Adicionar</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="mnp"><div class="mb"><div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome" list="ifcl" autocomplete="off"/><datalist id="ifcl"></datalist></div><div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas..."></textarea></div><div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" step="0.01"/></div><div class="fg"><label>Sinal (R$)</label><input id="ifs" type="number" step="0.01"/></div><div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="(DDD) Número"/></div><div class="fg"><label>Entrega</label><input id="ife" type="date"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button><button class="btn bp sm" onclick="addCard()">➕ Adicionar</button></div></div></div>
 
-<div class="mo" id="mped">
-  <div class="mb">
-    <div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div>
-    <div class="my">
-      <div class="ib" id="mpif"></div>
-      <div class="fr">
-        <div class="fi"><label>Total</label><p id="mptot">–</p></div>
-        <div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div>
-        <div class="fi"><label>Restante</label><p id="mprest">–</p></div>
-      </div>
-      <div class="tr2">
-        <div><div class="tl2">💳 Pago</div></div>
-        <label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label>
-      </div>
-      <div class="tr2">
-        <div><div class="tl2">📦 Entregue</div></div>
-        <label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label>
-      </div>
-    </div>
-    <div class="mf">
-      <button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button>
-      <button class="btn out sm" onclick="editPA()">✏️ Editar</button>
-      <button class="btn bs sm" onclick="abrirLV()">💰 Lançar Venda</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="mped"><div class="mb"><div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div><div class="my"><div class="ib" id="mpif"></div><div class="fr"><div class="fi"><label>Total</label><p id="mptot">–</p></div><div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div><div class="fi"><label>Restante</label><p id="mprest">–</p></div></div><div class="tr2"><div><div class="tl2">💳 Pago</div></div><label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label></div><div class="tr2"><div><div class="tl2">📦 Entregue</div></div><label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label></div></div><div class="mf"><button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button><button class="btn out sm" onclick="editPA()">✏️ Editar</button><button class="btn bs sm" onclick="abrirLV()">💰 Lançar Venda</button></div></div></div>
 
-<div class="mo" id="mhc">
-  <div class="mb" style="max-width:600px">
-    <div class="mh"><h3 id="mhctt">👁️ Histórico: Cliente</h3><button class="mc" onclick="CM('mhc')">✕</button></div>
-    <div class="my" style="padding:10px 0;">
-      <div class="tc" style="box-shadow:none; padding:0; margin:0;">
-        <table><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead>
-        <tbody id="tbhc"></tbody></table>
-      </div>
-    </div>
-    <div class="mf">
-      <button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="mhc"><div class="mb" style="max-width:600px"><div class="mh"><h3 id="mhctt">👁️ Histórico</h3><button class="mc" onclick="CM('mhc')">✕</button></div><div class="my"><div class="tc" style="box-shadow:none; padding:0;"><table style="min-width:auto;"><thead><tr><th>Data</th><th>Desc</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbhc"></tbody></table></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button></div></div></div>
 
-<div class="mo" id="mlv">
-  <div class="mb" style="max-width:430px">
-    <div class="mh" style="color:var(--ok)"><h3>💰 Confirmar Venda</h3><button class="mc" onclick="CM('mlv')">✕</button></div>
-    <div class="my">
-      <p style="font-size:.82rem;margin-bottom:12px;color:var(--tl)">O card será arquivado em <strong>Concluídos</strong>.</p>
-      <div class="fg-grid" style="gap:9px">
-        <div class="fg fl"><label>Produto</label><input id="lvp" type="text"/></div>
-        <div class="fg"><label>Categoria</label><select id="lvcat"><option>Camisetas</option><option>Canecas</option><option>Agendas</option><option>Cadernos</option><option>Etiquetas</option><option>Outros</option></select></div>
-        <div class="fg"><label>Valor total</label><input id="lvt" type="number" step="0.01"/></div>
-        <div class="fg"><label>Pgto</label><select id="lvpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Fiado</option></select></div>
-        <div class="fg"><label>Data</label><input id="lvd" type="date"/></div>
-        <div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="document.getElementById('lvqw').style.display=this.value?'block':'none'"><option value="">— Não abater —</option></select></div>
-        <div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div>
-      </div>
-    </div>
-    <div class="mf">
-      <button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button>
-      <button class="btn bs sm" onclick="confLV()">✅ Confirmar</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="mlv"><div class="mb" style="max-width:430px"><div class="mh" style="color:var(--ok)"><h3>💰 Confirmar Venda</h3><button class="mc" onclick="CM('mlv')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg fl"><label>Produto</label><input id="lvp" type="text"/></div><div class="fg"><label>Categoria</label><select id="lvcat"><option>Camisetas</option><option>Canecas</option><option>Agendas</option><option>Cadernos</option><option>Etiquetas</option><option>Outros</option></select></div><div class="fg"><label>Valor</label><input id="lvt" type="number" step="0.01"/></div><div class="fg"><label>Pgto</label><select id="lvpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Fiado</option></select></div><div class="fg"><label>Data</label><input id="lvd" type="date"/></div><div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="document.getElementById('lvqw').style.display=this.value?'block':'none'"><option value="">— Não abater —</option></select></div><div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button><button class="btn bs sm" onclick="confLV()">✅ Confirmar</button></div></div></div>
 
-<div class="mo" id="mep">
-  <div class="mb">
-    <div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div>
-    <div class="my">
-      <div class="fg-grid" style="gap:9px">
-        <div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div>
-        <div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div>
-        <div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div>
-        <div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" min="0" step="0.01"/></div>
-        <div class="fg"><label>Sinal (R$)</label><input id="eps" type="number" min="0" step="0.01"/></div>
-        <div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div>
-      </div>
-    </div>
-    <div class="mf">
-      <button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button>
-      <button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="mep"><div class="mb"><div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div><div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div><div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div><div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" step="0.01"/></div><div class="fg"><label>Sinal (R$)</label><input id="eps" type="number" step="0.01"/></div><div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button><button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button></div></div></div>
 
 <div class="mo" id="mnc"><div class="sm-box"><h3>➕ Nova Coluna</h3><input id="ncn" type="text" placeholder="Nome..." maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mnc')">Cancelar</button><button class="btn bp sm" onclick="criarCol()">✅ Criar</button></div></div></div>
 <div class="mo" id="mrc"><div class="sm-box"><h3>✏️ Renomear Coluna</h3><input id="rcn" type="text" maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mrc')">Cancelar</button><button class="btn bp sm" onclick="renCol()">✅ Salvar</button></div></div></div>
@@ -570,7 +477,7 @@ function fazerLogin() {
 }
 function fazerLogout() { auth.signOut(); }
 
-// ── 2. SEPARAÇÃO DE DADOS NO FIREBASE E MIGRAÇÃO ──
+// ── 2. SEPARAÇÃO DE DADOS NO FIREBASE ──
 const K = {p:'pedidos', co:'concluidos', col:'colunas', v:'vendas', c:'compras', e:'estoque', cl:'clientes'};
 let MEM = { [K.p]:[], [K.co]:[], [K.col]:[], [K.v]:[], [K.c]:[], [K.e]:[], [K.cl]:[] };
 let activeFilter = null; 
@@ -850,26 +757,95 @@ function abrRnc(id){edColId=id;const col=getCols().find(c=>c.id===id);document.g
 function renCol(){const n=gv('rcn').trim();if(n&&edColId){const c=getCols();const i=c.findIndex(x=>x.id===edColId);if(i!==-1)c[i].nome=n;DB.set(K.col,c);CM('mrc');atualizarKanbanEAlertas();}}
 function delCol(id){if(DB.get(K.p).some(p=>(p.colId||getCols()[0].id)===id))return toast('Mova os pedidos antes!',true);conf('Excluir coluna?',()=>{DB.set(K.col,getCols().filter(c=>c.id!==id));atualizarKanbanEAlertas();});}
 
-// Lançar Venda
+// Lançar Venda E DESFAZER
 function abrirLV(){
   const p=DB.get(K.p).find(x=>x.id===actPed); if(!p) return;
   document.getElementById('lvp').value=p.desc; document.getElementById('lvt').value=p.valor; document.getElementById('lvd').value=hj();
+  
+  // Popula os estoques na listagem
+  const sel=document.getElementById('lvest');
+  sel.innerHTML=`<option value="">— Não abater —</option>`+(DB.get(K.e)||[]).map(e=>`<option value="${e.id}">${e.nome}</option>`).join('');
+  document.getElementById('lvqw').style.display='none';
+  document.getElementById('lvq').value='1';
+  
   CM('mped'); OM('mlv');
 }
+
 function confLV(){
-  const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return;
-  const vs=DB.get(K.v)||[]; vs.unshift({id:uid(),cliente:ps[i].cliente,produto:gv('lvp'),categoria:gv('lvcat'),qtd:1,total:Number(gv('lvt')),pgto:gv('lvpg'),data:gv('lvd')||hj()});
+  const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return; const ped=ps[i];
+  const vId = uid(); // ID da nova venda para linkar
   
-  const estId=gv('lvest');if(estId){const es=DB.get(K.e);const ei=es.findIndex(e=>e.id===estId);if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-Number(gv('lvq')||1));DB.set(K.e,es);}}
+  const vs=DB.get(K.v)||[]; 
+  vs.unshift({id:vId,cliente:ped.cliente,produto:gv('lvp'),categoria:gv('lvcat'),qtd:1,total:Number(gv('lvt')),pgto:gv('lvpg'),data:gv('lvd')||hj()});
   
-  const co=DB.get(K.co)||[]; co.unshift({id:uid(),cliente:ps[i].cliente,desc:ps[i].desc,valor:ps[i].valor,dataConc:hj()});
-  DB.set(K.v,vs); DB.set(K.co,co); ps.splice(i,1); DB.set(K.p,ps); CM('mlv'); atualizarKanbanEAlertas(); toast("Venda Lançada e Arquivada!");
+  const estId=gv('lvest');
+  let qtdAbatida = 0;
+  if(estId){
+      qtdAbatida = Number(gv('lvq')||1);
+      const es=DB.get(K.e);const ei=es.findIndex(e=>e.id===estId);
+      if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-qtdAbatida);DB.set(K.e,es);}
+  }
+  
+  // Salva o "Backup" do pedido dentro do Concluídos para poder desfazer depois
+  const co=DB.get(K.co)||[]; 
+  co.unshift({id:uid(),cliente:ped.cliente,desc:ped.desc,valor:ped.valor,dataConc:hj(), vendaId: vId, pedOriginal: ped, estId: estId, qtdEst: qtdAbatida});
+  
+  DB.set(K.v,vs); DB.set(K.co,co); ps.splice(i,1); DB.set(K.p,ps); 
+  CM('mlv'); atualizarKanbanEAlertas(); toast("Venda Lançada e Arquivada!");
 }
+
 function renderConc(){
   const b=gv('fc0').toLowerCase(); const d=(DB.get(K.co)||[]).filter(c=>!b||c.cliente.toLowerCase().includes(b));
-  document.getElementById('tbc').innerHTML=d.length?d.map(c=>`<tr><td>${fd(c.dataConc)}</td><td><strong>${c.cliente}</strong></td><td>${(c.desc||'').slice(0,55)}</td><td style="color:var(--ok);font-weight:700">${brl(c.valor)}</td><td><button class="btn bd sm" onclick="delConc('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;">Nenhum concluído</td></tr>';
+  document.getElementById('tbc').innerHTML=d.length?d.map(c=>`<tr><td>${fd(c.dataConc)}</td><td><strong>${c.cliente}</strong></td><td>${(c.desc||'').slice(0,55)}</td><td style="color:var(--ok);font-weight:700">${brl(c.valor)}</td>
+  <td>
+    <button class="btn bw sm" title="Desfazer e voltar ao Kanban" onclick="desfazerConc('${c.id}')">↩️</button>
+    <button class="btn bd sm" title="Apagar definitivamente" onclick="delConc('${c.id}')">🗑️</button>
+  </td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;">Nenhum concluído</td></tr>';
 }
-function delConc(id){conf('Excluir registro?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
+
+function desfazerConc(id) {
+    conf('Desfazer conclusão? O pedido volta ao Kanban e a Venda é cancelada.', () => {
+        const co = DB.get(K.co) || [];
+        const idx = co.findIndex(c => c.id === id);
+        if (idx === -1) return;
+        const item = co[idx];
+        
+        // 1. Apaga a venda lá do painel de Vendas
+        if(item.vendaId) {
+            let vs = DB.get(K.v) || [];
+            vs = vs.filter(v => v.id !== item.vendaId);
+            DB.set(K.v, vs);
+        }
+        
+        // 2. Devolve o card pro Kanban
+        const ps = DB.get(K.p) || [];
+        if(item.pedOriginal) {
+            ps.unshift(item.pedOriginal);
+        } else {
+            ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: '', data: hj(), pago: false, entregue: false});
+        }
+        DB.set(K.p, ps);
+        
+        // 3. Devolve o estoque se tiver abatido
+        if(item.estId) {
+            let es = DB.get(K.e) || [];
+            let ei = es.findIndex(e => e.id === item.estId);
+            if(ei !== -1) {
+                es[ei].qtd += (item.qtdEst || 1);
+                DB.set(K.e, es);
+            }
+        }
+        
+        // 4. Apaga da lista de concluidos
+        co.splice(idx, 1);
+        DB.set(K.co, co);
+        
+        renderConc();
+        toast('✅ Restaurado para o Kanban!');
+    });
+}
+
+function delConc(id){conf('Excluir registro permanentemente?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
 // ── 6. VENDAS MANUAIS ──
 function calcV(){document.getElementById('vt').value=(Number(gv('vu')||0)*Number(gv('vq')||1)).toFixed(2);}
@@ -964,7 +940,7 @@ function gerarR(){
   const sEl=document.getElementById('rrs'); sEl.textContent=brl(saldoFinal);
   sEl.style.color=saldoFinal>=0?'var(--ok)':'var(--no)';
 
-  const movs=[...vs.map(x=>({d:x.data,t:'Venda',desc:x.produto,v:x.total,s:1})),...cs.map(x=>({d:x.data,t:x.categoria,desc:x.fornecedor,v:x.valor,s:-1}))].sort((a,b)=>b.d.localeCompare(a.d));
+  const movs=[...vs.map(x=>({d:x.data,t:'Venda',desc:x.produto,v:x.total,s:1})),...cs.map(x=>({d:x.data,t:x.categoria,desc:x.fornecedor,v:x.valor,s:-1}))].sort((a,b)=>b.d.localeCompare(a.data));
   document.getElementById('tbrv').innerHTML=movs.length?movs.map(m=>`<tr><td>${fd(m.d)}</td><td><span class="bj ${m.s>0?'g':(m.t.includes('Retirada')||m.t.includes('Pró-labore')?'o':'r')}">${m.t}</span></td><td>${m.desc}</td><td>${brl(m.v)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;">Sem dados no período</td></tr>';
 }
 </script>
