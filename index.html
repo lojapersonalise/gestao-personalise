@@ -258,7 +258,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v10.4 · Dash & AutoFill</div>
+  <div class="sb-foot">v11.0 · Smart Pay</div>
 </div>
 
 <div id="main">
@@ -275,7 +275,16 @@ input:checked+.sl:before{transform:translateX(19px)}
     <div class="dc g"><span class="lb">Vendas do mês</span><span class="vl" id="dv">R$ 0,00</span><span class="sb2" id="dvq">0 vendas</span></div>
     <div class="dc r"><span class="lb">Custos da Loja</span><span class="vl" id="dc">R$ 0,00</span><span class="sb2" id="dcq">0 compras</span></div>
     <div class="dc o"><span class="lb">Retiradas do Mês</span><span class="vl" id="dr">R$ 0,00</span><span class="sb2">pessoal/sócios</span></div>
-    <div class="dc b"><span class="lb">Lucro do Negócio</span><span class="vl" id="dl">R$ 0,00</span><span class="sb2" id="dls">vendas - custos loja</span></div>
+    <div class="dc b"><span class="lb">Lucro Líquido</span><span class="vl" id="dl">R$ 0,00</span><span class="sb2" id="dls">vendas - custos loja</span></div>
+  </div>
+  
+  <div class="cx b" style="margin-bottom:20px; text-align:center; border-top-color:var(--ok); background:#f1f8e9;">
+    <span class="lb" style="color:var(--ok)">SALDO REAL DA CONTA (MÊS)</span>
+    <span class="vl" id="dsr" style="font-size:2rem; color:var(--ok)">R$ 0,00</span>
+    <small style="color:var(--tl)">Lucro Líquido - Retiradas</small>
+  </div>
+
+  <div class="cr">
     <div class="dc" style="border-color:var(--wa)"><span class="lb">Pedidos abertos</span><span class="vl" id="dp">0</span><span class="sb2">não entregues</span></div>
     <div class="dc" style="border-color:var(--p)"><span class="lb">Itens estoque</span><span class="vl" id="de">0</span><span class="sb2">cadastrados</span></div>
   </div>
@@ -426,15 +435,35 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 </div></div><div id="toast"></div>
 
-<div class="mo" id="mnp"><div class="mb"><div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome" list="ifcl" autocomplete="off" oninput="autoFillTel()"/><datalist id="ifcl"></datalist></div><div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas..."></textarea></div><div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" step="0.01"/></div><div class="fg"><label>Sinal recebido (R$)</label><input id="ifs" type="number" step="0.01"/></div><div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="(DDD) Número"/></div><div class="fg"><label>Entrega</label><input id="ife" type="date"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button><button class="btn bp sm" onclick="addCard()">➕ Adicionar</button></div></div></div>
+<div class="mo" id="mnp"><div class="mb"><div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px">
+  <div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome" list="ifcl" autocomplete="off" oninput="autoFillTel()"/><datalist id="ifcl"></datalist></div>
+  <div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas..."></textarea></div>
+  <div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" step="0.01"/></div>
+  <div class="fg"><label>Sinal recebido (R$)</label><div style="display:flex;gap:5px;"><input id="ifs" type="number" step="0.01" style="width:50%"/><select id="ifspg" style="width:50%; padding:7px;"><option>PIX</option><option>Dinheiro</option><option>Cartão Crédito</option><option>Cartão Débito</option></select></div></div>
+  <div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="(DDD) Número"/></div>
+  <div class="fg"><label>Entrega</label><input id="ife" type="date"/></div>
+</div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button><button class="btn bp sm" onclick="addCard()">➕ Adicionar</button></div></div></div>
 
-<div class="mo" id="mped"><div class="mb"><div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div><div class="my"><div class="ib" id="mpif"></div><div class="fr"><div class="fi"><label>Total</label><p id="mptot">–</p></div><div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div><div class="fi"><label>Restante</label><p id="mprest">–</p></div></div><div class="tr2"><div><div class="tl2">💳 Pago</div></div><label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label></div><div class="tr2"><div><div class="tl2">📦 Entregue</div></div><label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label></div></div><div class="mf"><button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button><button class="btn out sm" onclick="editPA()">✏️ Editar</button><button class="btn bs sm" onclick="abrirLV()">📦 Finalizar / Arquivar</button></div></div></div>
+<div class="mo" id="mped"><div class="mb"><div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div><div class="my"><div class="ib" id="mpif"></div><div class="fr"><div class="fi"><label>Total</label><p id="mptot">–</p></div><div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div><div class="fi"><label>Restante</label><p id="mprest">–</p></div></div>
+  <div class="tr2">
+    <div><div class="tl2">💳 Pago</div><div class="ts"><select id="mppg_met" style="padding:2px; font-size:0.75rem; border-radius:4px; border:1px solid var(--bor); margin-top:3px; outline:none;"><option>PIX</option><option>Dinheiro</option><option>Cartão Crédito</option><option>Cartão Débito</option></select></div></div>
+    <label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label>
+  </div>
+  <div class="tr2"><div><div class="tl2">📦 Entregue</div></div><label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label></div>
+</div><div class="mf"><button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button><button class="btn out sm" onclick="editPA()">✏️ Editar</button><button class="btn bs sm" onclick="abrirLV()">📦 Finalizar / Arquivar</button></div></div></div>
 
 <div class="mo" id="mhc"><div class="mb" style="max-width:600px"><div class="mh"><h3 id="mhctt">👁️ Histórico</h3><button class="mc" onclick="CM('mhc')">✕</button></div><div class="my"><div class="tc" style="box-shadow:none; padding:0;"><table style="min-width:auto;"><thead><tr><th>Data</th><th>Desc</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbhc"></tbody></table></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button></div></div></div>
 
 <div class="mo" id="mlv"><div class="mb" style="max-width:430px"><div class="mh" style="color:var(--ok)"><h3>📦 Finalizar e Arquivar</h3><button class="mc" onclick="CM('mlv')">✕</button></div><div class="my"><p style="font-size:.82rem;margin-bottom:12px;color:var(--tl)">O pedido irá para os <strong>Concluídos</strong>. Os recebimentos (Sinal e Pagamento) são lançados automaticamente na aba Vendas.</p><div class="fg-grid" style="gap:9px"><div class="fg fl" style="display:none;"><label>Produto</label><input id="lvp" type="text"/></div><div class="fg" style="display:none;"><label>Valor pendente a lançar (R$)</label><input id="lvt" type="number" step="0.01"/></div><div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="document.getElementById('lvqw').style.display=this.value?'block':'none'"><option value="">— Não abater —</option></select></div><div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button><button class="btn bs sm" onclick="confLV()">✅ Arquivar Pedido</button></div></div></div>
 
-<div class="mo" id="mep"><div class="mb"><div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px"><div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div><div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div><div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div><div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" step="0.01"/></div><div class="fg"><label>Sinal recebido (R$)</label><input id="eps" type="number" step="0.01"/></div><div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button><button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button></div></div></div>
+<div class="mo" id="mep"><div class="mb"><div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px">
+  <div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div>
+  <div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div>
+  <div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div>
+  <div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" step="0.01"/></div>
+  <div class="fg"><label>Sinal recebido (R$)</label><div style="display:flex;gap:5px;"><input id="eps" type="number" step="0.01" style="width:50%"/><select id="epspg" style="width:50%; padding:7px;"><option>PIX</option><option>Dinheiro</option><option>Cartão Crédito</option><option>Cartão Débito</option></select></div></div>
+  <div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div>
+</div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button><button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button></div></div></div>
 
 <div class="mo" id="mnc"><div class="sm-box"><h3>➕ Nova Coluna</h3><input id="ncn" type="text" placeholder="Nome..." maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mnc')">Cancelar</button><button class="btn bp sm" onclick="criarCol()">✅ Criar</button></div></div></div>
 <div class="mo" id="mrc"><div class="sm-box"><h3>✏️ Renomear Coluna</h3><input id="rcn" type="text" maxlength="26"/><div class="ma"><button class="btn sm" style="background:#eee" onclick="CM('mrc')">Cancelar</button><button class="btn bp sm" onclick="renCol()">✅ Salvar</button></div></div></div>
@@ -531,7 +560,7 @@ async function iniciarApp() {
               document.getElementById('loader').classList.add('off');
               goTo(1); 
               initDragToScroll(); 
-              toast("✅ Banco de Dados Otimizado!");
+              toast("✅ Conectado com sucesso!");
               firstLoad = false;
           }
       } else {
@@ -574,7 +603,7 @@ function copiarTexto(e,t){ e.stopPropagation(); navigator.clipboard.writeText(t)
 
 function initDragToScroll() {
   const slider = document.getElementById('kb'); let isDown=false,startX,scrollLeft;
-  slider.onmousedown=e=>{ if(e.target.closest('.kd')||e.target.closest('.kch')||e.target.closest('button')||e.target.closest('input')||e.target.closest('.k-tel'))return; isDown=true; startX=e.pageX-slider.offsetLeft; scrollLeft=slider.scrollLeft; };
+  slider.onmousedown=e=>{ if(e.target.closest('.kd')||e.target.closest('.kch')||e.target.closest('button')||e.target.closest('input')||e.target.closest('select')||e.target.closest('.k-tel'))return; isDown=true; startX=e.pageX-slider.offsetLeft; scrollLeft=slider.scrollLeft; };
   slider.onmouseleave=()=>isDown=false; slider.onmouseup=()=>isDown=false;
   slider.onmousemove=e=>{ if(!isDown)return; e.preventDefault(); const x=e.pageX-slider.offsetLeft; slider.scrollLeft=scrollLeft-(x-startX)*1.5; };
 }
@@ -583,7 +612,6 @@ document.querySelectorAll('.mo').forEach(m => { m.addEventListener('click', (e) 
 document.getElementById('vd').value = hj();
 document.getElementById('cd').value = hj();
 
-// FUNÇÃO AUTO-FILL DE CLIENTE NO NOVO PEDIDO
 function autoFillTel() {
     const nomeDigitado = gv('ifc').trim().toLowerCase();
     if (!nomeDigitado) return;
@@ -608,15 +636,12 @@ function buildDash(){
   const d=hj(),mes=d.slice(0,7);
   const vs=DB.get(K.v)||[],cs=DB.get(K.c)||[],ps=DB.get(K.p)||[],es=DB.get(K.e)||[];
   
-  // CAIXA DIÁRIO: Entra tudo que for Venda/Sinal hoje, sai tudo que for Despesa/Retirada hoje.
   const vH=vs.filter(v=>v.data===d),cH=cs.filter(c=>c.data===d);
   const ent=vH.reduce((a,v)=>a+Number(v.total||0),0),sai=cH.reduce((a,c)=>a+Number(c.valor||0),0),sal=ent-sai;
   
-  // TOTAL DO MÊS: Reflete o faturamento do mês (que inclui vendas, sinais e complementos pagos)
   const vM=vs.filter(v=>v.data.startsWith(mes)),cM=cs.filter(c=>c.data.startsWith(mes));
   const fat=vM.reduce((a,b)=>a+Number(b.total),0);
   
-  // CUSTOS: ignora as retiradas. RETIRADAS: soma só retiradas.
   const custos=cM.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
   const retiradas=cM.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
 
@@ -629,7 +654,12 @@ function buildDash(){
   sv('dc',brl(custos));sv('dcq',cM.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).length+' compras');
   sv('dr',brl(retiradas)); 
   
-  const dl=document.getElementById('dl');if(dl){dl.textContent=brl(fat-custos);dl.style.color=(fat-custos)>=0?'var(--ok)':'var(--no)';}
+  const lucroLiq = fat - custos;
+  const dl=document.getElementById('dl');if(dl){dl.textContent=brl(lucroLiq);dl.style.color=lucroLiq>=0?'var(--ok)':'var(--no)';}
+  
+  const saldoReal = lucroLiq - retiradas;
+  const dsr=document.getElementById('dsr');if(dsr){dsr.textContent=brl(saldoReal);dsr.style.color=saldoReal>=0?'var(--ok)':'var(--no)';}
+
   sv('dp',ps.filter(p=>!p.entregue).length);
   sv('de',es.length);
   
@@ -716,6 +746,7 @@ function stab(show,hide,el){
 function addCard(){
   let cli=gv('ifc').trim(), desc=gv('ifd').trim(), tel=gv('ift').trim();
   let valTotal = Number(gv('ifv')||0), sinalVal = Number(gv('ifs')||0);
+  let sinalPgto = gv('ifspg');
   if(!cli||!desc) return toast("Preencha cliente e descrição!", true);
   
   const cls=DB.get(K.cl)||[]; let cleanTel=tel.replace(/\D/g,'');
@@ -723,12 +754,11 @@ function addCard(){
   if(ex) cli=ex.nome;
   else { cls.unshift({id:uid(),nome:cli,tel:tel,cidade:''}); DB.set(K.cl,cls); updDL(); }
   
-  // LANÇAMENTO AUTOMÁTICO DO SINAL
   let sVId = null;
   if(sinalVal > 0) {
       sVId = 'v_' + uid();
       const vs = DB.get(K.v) || [];
-      vs.unshift({id: sVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Vendas', qtd: 1, total: sinalVal, pgto: 'PIX', data: hj()});
+      vs.unshift({id: sVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Sinal de Pedido', qtd: 1, total: sinalVal, pgto: sinalPgto, data: hj()});
       DB.set(K.v, vs);
   }
 
@@ -747,7 +777,6 @@ function abrModal(id){
   let wa=num.length>=10?`<a href="https://wa.me/55${num}" target="_blank" style="background:#25D366;color:#fff;padding:3px 10px;border-radius:10px;text-decoration:none;font-size:0.7rem;font-weight:bold;margin-left:10px;">💬 WhatsApp</a>`:'';
   document.getElementById('mpif').innerHTML=`<div style="font-weight:bold;font-size:1.05rem;color:var(--pd);margin-bottom:6px;display:flex;align-items:center;">${p.cliente} ${wa}</div><strong>Descrição:</strong> ${p.desc}`;
   sv('mptot',brl(p.valor)); sv('mpsin',brl(p.sinal)); sv('mprest',brl(Number(p.valor)-Number(p.sinal)));
-  sv('mppstat',p.pago?'✅ Pago':'💳 Pendente');
   document.getElementById('mppg').checked=!!p.pago; document.getElementById('mpeg').checked=!!p.entregue;
   OM('mped');
 }
@@ -757,19 +786,18 @@ function togF(f){
   const isC=document.getElementById(f==='pago'?'mppg':'mpeg').checked;
   let p = ps[i];
   
-  // LANÇAMENTO AUTOMÁTICO DO PAGAMENTO RESTANTE
   if(f === 'pago') {
       if(isC && !p.pago) {
           let rest = Number(p.valor||0) - Number(p.sinal||0);
           if(rest > 0) {
               let rId = 'v_' + uid();
               const vs = DB.get(K.v) || [];
-              vs.unshift({id: rId, cliente: p.cliente, produto: 'Restante - ' + p.desc, categoria: 'Vendas', qtd: 1, total: rest, pgto: 'PIX', data: hj()});
+              let pgtoMetodo = gv('mppg_met');
+              vs.unshift({id: rId, cliente: p.cliente, produto: 'Restante - ' + p.desc, categoria: 'Vendas', qtd: 1, total: rest, pgto: pgtoMetodo, data: hj()});
               DB.set(K.v, vs);
               p.restVId = rId;
           }
       } else if (!isC && p.pago) {
-          // Desmarcou o pagamento: cancela a venda do restante
           if(p.restVId) {
               let vs = DB.get(K.v) || [];
               vs = vs.filter(v => v.id !== p.restVId);
@@ -790,7 +818,6 @@ function delPA(){
     conf('Excluir pedido definitivamente?',()=>{
         const ps=DB.get(K.p); const p=ps.find(x=>x.id===actPed);
         if(p) {
-            // Limpa as vendas financeiras associadas a este pedido
             let vs = DB.get(K.v) || [];
             if(p.sinalVId) vs = vs.filter(v => v.id !== p.sinalVId);
             if(p.restVId) vs = vs.filter(v => v.id !== p.restVId);
@@ -804,6 +831,14 @@ function delPA(){
 function editPA(){
   const p=DB.get(K.p).find(x=>x.id===actPed);if(!p)return;
   document.getElementById('epc').value=p.cliente;document.getElementById('ept').value=p.tel||'';document.getElementById('epe').value=p.entrega||'';document.getElementById('epv').value=p.valor;document.getElementById('eps').value=p.sinal||0;document.getElementById('epd').value=p.desc;
+  
+  let sMet = 'PIX';
+  if(p.sinalVId) {
+      let v = (DB.get(K.v)||[]).find(x=>x.id===p.sinalVId);
+      if(v) sMet = v.pgto;
+  }
+  document.getElementById('epspg').value = sMet;
+
   CM('mped');OM('mep');
 }
 
@@ -813,15 +848,15 @@ function salvarEd(){
   let p = ps[i];
   let novoSinal = Number(gv('eps')||0);
   let novoValor = Number(gv('epv')||0);
+  let sinalPgto = gv('epspg');
   
-  // Atualiza as Vendas se houver edição nos valores
   let vs = DB.get(K.v) || [];
   if(p.sinalVId) {
       let vi = vs.findIndex(v => v.id === p.sinalVId);
-      if(vi !== -1) { vs[vi].total = novoSinal; vs[vi].cliente = cli; vs[vi].produto = 'Sinal - ' + desc; }
+      if(vi !== -1) { vs[vi].total = novoSinal; vs[vi].cliente = cli; vs[vi].produto = 'Sinal - ' + desc; vs[vi].pgto = sinalPgto; }
   } else if (novoSinal > 0) {
       p.sinalVId = 'v_' + uid();
-      vs.unshift({id: p.sinalVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Vendas', qtd: 1, total: novoSinal, pgto: 'PIX', data: hj()});
+      vs.unshift({id: p.sinalVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Sinal de Pedido', qtd: 1, total: novoSinal, pgto: sinalPgto, data: hj()});
   }
   
   if(p.restVId) {
@@ -839,7 +874,6 @@ function abrRnc(id){edColId=id;const col=getCols().find(c=>c.id===id);document.g
 function renCol(){const n=gv('rcn').trim();if(n&&edColId){const c=getCols();const i=c.findIndex(x=>x.id===edColId);if(i!==-1)c[i].nome=n;DB.set(K.col,c);CM('mrc');atualizarKanbanEAlertas();}}
 function delCol(id){if(DB.get(K.p).some(p=>(p.colId||getCols()[0].id)===id))return toast('Mova os pedidos antes!',true);conf('Excluir coluna?',()=>{DB.set(K.col,getCols().filter(c=>c.id!==id));atualizarKanbanEAlertas();});}
 
-// FINALIZAR / ARQUIVAR VENDA
 function abrirLV(){
   const p=DB.get(K.p).find(x=>x.id===actPed); if(!p) return;
   const sel=document.getElementById('lvest');
@@ -852,6 +886,17 @@ function abrirLV(){
 function confLV(){
   const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return; const ped=ps[i];
   
+  if(!ped.pago) {
+     let rest = Number(ped.valor||0) - Number(ped.sinal||0);
+     if(rest > 0) {
+         ped.restVId = 'v_' + uid();
+         const vs = DB.get(K.v) || [];
+         vs.unshift({id: ped.restVId, cliente: ped.cliente, produto: 'Restante - ' + ped.desc, categoria: 'Vendas', qtd: 1, total: rest, pgto: 'PIX', data: hj()});
+         DB.set(K.v, vs);
+     }
+     ped.pago = true;
+  }
+
   const estId=gv('lvest'); let qtdAbatida = 0;
   if(estId){
       qtdAbatida = Number(gv('lvq')||1);
@@ -883,7 +928,7 @@ function desfazerConc(id) {
         
         const ps = DB.get(K.p) || [];
         if(item.pedOriginal) { ps.unshift(item.pedOriginal); } 
-        else { ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: '', data: hj(), pago: false, entregue: false}); }
+        else { ps.unshift({id: uid(), colId: getCols()[0].id, cliente: item.cliente, desc: item.desc, valor: item.valor, sinal: 0, tel: '', entrega: '', data: hj(), pago: true, entregue: false}); }
         DB.set(K.p, ps);
         
         if(item.estId) {
@@ -897,7 +942,7 @@ function desfazerConc(id) {
 
 function delConc(id){conf('Excluir registro permanentemente?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
-// ── 6. VENDAS MANUAIS ──
+// ── 6. VENDAS MANUAIS (Proteção de Vínculo do Kanban) ──
 function calcV(){document.getElementById('vt').value=(Number(gv('vu')||0)*Number(gv('vq')||1)).toFixed(2);}
 function salvarV(){
   const p=gv('vp').trim();if(!p)return toast('Preencha o produto!',true);
@@ -910,7 +955,21 @@ function renderV(){
   const b=gv('fvb').toLowerCase(); const d=(DB.get(K.v)||[]).filter(v=>!b||v.cliente.toLowerCase().includes(b)||v.produto.toLowerCase().includes(b));
   document.getElementById('tbv').innerHTML=d.length?d.map(v=>`<tr><td>${fd(v.data)}</td><td>${v.cliente}</td><td>${v.produto}</td><td>${v.categoria||'-'}</td><td>${v.qtd||1}</td><td style="color:var(--ok);font-weight:700">${brl(v.total)}</td><td>${v.pgto||'-'}</td><td><button class="btn bd sm" onclick="delV('${v.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;">Nenhuma venda encontrada</td></tr>';
 }
-function delV(id){conf('Excluir venda?',()=>{DB.set(K.v,DB.get(K.v).filter(x=>x.id!==id));renderV();});}
+
+function delV(id){
+    conf('Excluir venda?',()=>{
+        let ps = DB.get(K.p) || [];
+        let mod = false;
+        ps.forEach(p => {
+            if(p.sinalVId === id) { p.sinal = 0; p.sinalVId = null; mod = true; }
+            if(p.restVId === id) { p.pago = false; p.restVId = null; mod = true; }
+        });
+        if(mod) { DB.set(K.p, ps); atualizarKanbanEAlertas(); }
+
+        DB.set(K.v,DB.get(K.v).filter(x=>x.id!==id));
+        renderV(); toast('Venda excluída!');
+    });
+}
 
 // ── 7. COMPRAS, DESPESAS E RETIRADAS ──
 function salvarC(){
