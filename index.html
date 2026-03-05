@@ -108,7 +108,7 @@ tr:hover td{background:var(--px)}
 .bj.o{background:#fff3e0;color:var(--wa)}.bj.b{background:#e3f2fd;color:var(--in)}
 .bj.p{background:var(--pl);color:var(--pd)}
 
-/* Paginação Clientes */
+/* Paginação Geral (Clientes e Vendas) */
 .pag-container { display: flex; align-items: center; justify-content: center; gap: 15px; padding-top: 15px; margin-top: 10px; border-top: 1px solid var(--px); }
 .pag-btn { background: var(--w); border: 1.5px solid var(--bor); color: var(--p); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: all 0.2s; }
 .pag-btn:hover:not(:disabled) { background: var(--px); border-color: var(--p); }
@@ -177,7 +177,6 @@ input:checked+.sl:before{transform:translateX(19px)}
 
 /* KANBAN BOARD */
 #kbs{padding-top:5px}#cs{display:none;padding-top:5px}
-
 #kb { display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; min-height:55vh; cursor: grab;}
 #kb:active { cursor: grabbing;}
 
@@ -258,7 +257,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v11.2 · BugFix AutoFill</div>
+  <div class="sb-foot">v11.3 · Paginação Vendas</div>
 </div>
 
 <div id="main">
@@ -338,6 +337,7 @@ input:checked+.sl:before{transform:translateX(19px)}
   <div class="tc">
     <table><thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Cat.</th><th>Qtd</th><th>Total</th><th>Pgto</th><th>Ações</th></tr></thead>
     <tbody id="tbv"></tbody></table>
+    <div id="v-pag"></div>
   </div>
 </div>
 
@@ -508,11 +508,12 @@ function fazerLogin() {
 }
 function fazerLogout() { auth.signOut(); }
 
-// ── 2. SEPARAÇÃO DE DADOS NO FIREBASE ──
+// ── 2. SEPARAÇÃO DE DADOS NO FIREBASE E PAGINAÇÃO GERAL ──
 const K = {p:'pedidos', co:'concluidos', col:'colunas', v:'vendas', c:'compras', e:'estoque', cl:'clientes'};
 let MEM = { [K.p]:[], [K.co]:[], [K.col]:[], [K.v]:[], [K.c]:[], [K.e]:[], [K.cl]:[] };
 let activeFilter = null; 
 let currentPageCl = 1;
+let currentPageV = 1;
 const ITEMS_PER_PAGE = 10;
 
 const DB = {
@@ -557,7 +558,6 @@ async function iniciarApp() {
       if(firstLoad) {
           loaded++;
           if(loaded === keys.length) {
-              // Carrega a listinha de clientes globalmente antes de tirar o loader
               updDL(); 
               document.getElementById('loader').classList.add('off');
               goTo(1); 
@@ -575,12 +575,12 @@ async function iniciarApp() {
 }
 
 function atualizarTelaAtual() {
-  updDL(); // Garante que as listinhas do Datalist estejam sempre atualizadas
+  updDL(); 
   const pages = ['p0','p1','p2','p3','p4','p5','p6'];
   const active = pages.find(p => document.getElementById(p).classList.contains('on'));
   if(active === 'p0') buildDash();
   if(active === 'p1') atualizarKanbanEAlertas();
-  if(active === 'p2') renderV();
+  if(active === 'p2') renderV(); 
   if(active === 'p3') renderC();
   if(active === 'p4') renderE();
   if(active === 'p5') renderCl();
@@ -601,7 +601,6 @@ function CM(id){document.getElementById(id).classList.remove('on')}
 function OM(id){document.getElementById(id).classList.add('on')}
 function conf(m,cb){document.getElementById('cfm').textContent=m;OM('mcf');document.getElementById('cfo').onclick=()=>{cb();CM('mcf')}}
 
-// FUNÇÃO GLOBAL DE ATUALIZAR DATALISTS (Caixinhas de sugestão)
 function updDL(){
     const cls=DB.get(K.cl) || [];
     ['vcl','ifcl'].forEach(id=>{
@@ -623,11 +622,9 @@ document.querySelectorAll('.mo').forEach(m => { m.addEventListener('click', (e) 
 document.getElementById('vd').value = hj();
 document.getElementById('cd').value = hj();
 
-// PREENCHIMENTO AUTOMÁTICO INSTANTÂNEO (oninput)
 function autoFillTel() {
     const nomeDigitado = gv('ifc').trim().toLowerCase();
-    if (!nomeDigitado) { document.getElementById('ift').value = ''; return; } // Limpa se apagar o nome
-    
+    if (!nomeDigitado) { document.getElementById('ift').value = ''; return; } 
     const cls = DB.get(K.cl) || [];
     const ex = cls.find(c => c.nome.toLowerCase() === nomeDigitado);
     if (ex && ex.tel) {
@@ -641,8 +638,8 @@ function goTo(n){
   document.querySelectorAll('nav a').forEach(a=>a.classList.remove('on'));
   document.getElementById('p'+n).classList.add('on');
   document.getElementById('n'+n).classList.add('on');
-  updDL(); // Atualiza listinhas sempre que mudar de tela
-  if(n===0) buildDash(); if(n===1) atualizarKanbanEAlertas(); if(n===2){renderV();} if(n===3) renderC(); if(n===4) renderE(); if(n===5) renderCl(); if(n===6) { setRDates(); gerarR(); }
+  updDL(); 
+  if(n===0) buildDash(); if(n===1) atualizarKanbanEAlertas(); if(n===2) renderV(); if(n===3) renderC(); if(n===4) renderE(); if(n===5) renderCl(); if(n===6) { setRDates(); gerarR(); }
 }
 
 let CHS={};
@@ -777,7 +774,6 @@ function addCard(){
   }
 
   const ps=DB.get(K.p)||[]; 
-  // FIX CRÍTICO APLICADO: Garantindo que nunca envie undefined
   ps.unshift({
       id:uid(), colId:getCols()[0].id, cliente:cli, desc:desc, valor:valTotal, sinal:sinalVal, tel:tel, 
       entrega:gv('ife') || null, data:hj(), pago:false, entregue:false, sinalVId: sVId || null, restVId: null
@@ -821,7 +817,7 @@ function togF(f){
               let vs = DB.get(K.v) || [];
               vs = vs.filter(v => v.id !== p.restVId);
               DB.set(K.v, vs);
-              p.restVId = null; // FIX CRÍTICO
+              p.restVId = null;
           }
       }
   }
@@ -912,7 +908,6 @@ function confLV(){
       if(ei!==-1){es[ei].qtd=Math.max(0,es[ei].qtd-qtdAbatida);DB.set(K.e,es);}
   }
   
-  // FIX CRÍTICO APLICADO
   const co=DB.get(K.co)||[]; 
   co.unshift({
       id:uid(),cliente:ped.cliente,desc:ped.desc,valor:ped.valor,dataConc:hj(), 
@@ -955,7 +950,7 @@ function desfazerConc(id) {
 
 function delConc(id){conf('Excluir registro permanentemente?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
-// ── 6. VENDAS MANUAIS ──
+// ── 6. VENDAS MANUAIS E PAGINAÇÃO ──
 function calcV(){document.getElementById('vt').value=(Number(gv('vu')||0)*Number(gv('vq')||1)).toFixed(2);}
 function salvarV(){
   const p=gv('vp').trim();if(!p)return toast('Preencha o produto!',true);
@@ -964,10 +959,26 @@ function salvarV(){
   DB.set(K.v,vs); limV(); renderV(); toast('Venda salva!');
 }
 function limV(){document.getElementById('vp').value='';document.getElementById('vt').value='';document.getElementById('vc').value='';document.getElementById('vu').value='';document.getElementById('vq').value='1';}
+
+// PAGINAÇÃO DE VENDAS APLICADA AQUI
 function renderV(){
-  const b=gv('fvb').toLowerCase(); const d=(DB.get(K.v)||[]).filter(v=>!b||v.cliente.toLowerCase().includes(b)||v.produto.toLowerCase().includes(b));
+  const b=gv('fvb').toLowerCase(); 
+  let d=(DB.get(K.v)||[]).filter(v=>!b||v.cliente.toLowerCase().includes(b)||v.produto.toLowerCase().includes(b));
+  
+  let pagHTML='';
+  if(!b && d.length > ITEMS_PER_PAGE) {
+    const tot=Math.ceil(d.length/ITEMS_PER_PAGE);
+    if(currentPageV>tot) currentPageV=tot;
+    if(currentPageV<1) currentPageV=1;
+    d=d.slice((currentPageV-1)*ITEMS_PER_PAGE, currentPageV*ITEMS_PER_PAGE);
+    pagHTML=`<div class="pag-container"><button class="pag-btn" onclick="mudarPagV(-1)" ${currentPageV===1?'disabled':''}>⬅️ Anterior</button><span class="pag-info">Pág ${currentPageV} de ${tot}</span><button class="pag-btn" onclick="mudarPagV(1)" ${currentPageV===tot?'disabled':''}>Próxima ➡️</button></div>`;
+  } else { currentPageV=1; }
+
   document.getElementById('tbv').innerHTML=d.length?d.map(v=>`<tr><td>${fd(v.data)}</td><td>${v.cliente}</td><td>${v.produto}</td><td>${v.categoria||'-'}</td><td>${v.qtd||1}</td><td style="color:var(--ok);font-weight:700">${brl(v.total)}</td><td>${v.pgto||'-'}</td><td><button class="btn bd sm" onclick="delV('${v.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;">Nenhuma venda encontrada</td></tr>';
+  document.getElementById('v-pag').innerHTML=pagHTML;
 }
+
+function mudarPagV(dir){ currentPageV+=dir; renderV(); }
 
 function delV(id){
     conf('Excluir venda?',()=>{
