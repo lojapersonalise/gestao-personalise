@@ -108,7 +108,7 @@ tr:hover td{background:var(--px)}
 .bj.o{background:#fff3e0;color:var(--wa)}.bj.b{background:#e3f2fd;color:var(--in)}
 .bj.p{background:var(--pl);color:var(--pd)}
 
-/* Paginação Geral (Clientes e Vendas) */
+/* Paginação Geral */
 .pag-container { display: flex; align-items: center; justify-content: center; gap: 15px; padding-top: 15px; margin-top: 10px; border-top: 1px solid var(--px); }
 .pag-btn { background: var(--w); border: 1.5px solid var(--bor); color: var(--p); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: all 0.2s; }
 .pag-btn:hover:not(:disabled) { background: var(--px); border-color: var(--p); }
@@ -257,7 +257,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v11.3 · Paginação Vendas</div>
+  <div class="sb-foot">v11.5 · Smart Tax & UI</div>
 </div>
 
 <div id="main">
@@ -272,9 +272,9 @@ input:checked+.sl:before{transform:translateX(19px)}
   </div>
   <div class="cr">
     <div class="dc g"><span class="lb">Vendas do mês</span><span class="vl" id="dv">R$ 0,00</span><span class="sb2" id="dvq">0 vendas</span></div>
-    <div class="dc r"><span class="lb">Custos da Loja</span><span class="vl" id="dc">R$ 0,00</span><span class="sb2" id="dcq">0 compras</span></div>
+    <div class="dc g" style="background:#e8f5e9;"><span class="lb" style="color:var(--ok)">Entradas em Dinheiro</span><span class="vl" id="ddin" style="color:var(--ok)">R$ 0,00</span><span class="sb2" id="ddinq" style="color:var(--ok)">0 no mês</span></div>
     <div class="dc o"><span class="lb">Retiradas do Mês</span><span class="vl" id="dr">R$ 0,00</span><span class="sb2">pessoal/sócios</span></div>
-    <div class="dc b"><span class="lb">Lucro Líquido</span><span class="vl" id="dl">R$ 0,00</span><span class="sb2" id="dls">vendas - custos loja</span></div>
+    <div class="dc b"><span class="lb">Lucro Líquido</span><span class="vl" id="dl">R$ 0,00</span><span class="sb2" id="dls">vendas reais - custos loja</span></div>
   </div>
   
   <div class="cx b" style="margin-bottom:20px; text-align:center; border-top-color:var(--ok); background:#f1f8e9;">
@@ -310,10 +310,11 @@ input:checked+.sl:before{transform:translateX(19px)}
     <div id="kb"></div>
   </div>
   <div id="cs">
-    <div class="fb"><input id="fc0" type="text" placeholder="🔍 Buscar concluído..." oninput="renderConc()"/></div>
+    <div class="fb"><input id="fc0" type="text" placeholder="🔍 Buscar concluído..." oninput="mudarPagC(0)"/></div>
     <div class="tc">
       <table><thead><tr><th>Data</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Ações</th></tr></thead>
       <tbody id="tbc"></tbody></table>
+      <div id="cs-pag"></div>
     </div>
   </div>
 </div>
@@ -327,15 +328,15 @@ input:checked+.sl:before{transform:translateX(19px)}
       <div class="fg"><label>Categoria</label><select id="vcat"><option>Camisetas</option><option>Canecas</option><option>Agendas</option><option>Cadernos</option><option>Etiquetas</option><option>Outros</option></select></div>
       <div class="fg"><label>Qtd</label><input id="vq" type="number" min="1" value="1" oninput="calcV()"/></div>
       <div class="fg"><label>Valor unit. (R$)</label><input id="vu" type="number" min="0" step="0.01" oninput="calcV()"/></div>
-      <div class="fg"><label>Total (R$)</label><input id="vt" type="number" step="0.01" readonly/></div>
-      <div class="fg"><label>Pagamento</label><select id="vpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Fiado</option></select></div>
+      <div class="fg"><label>Total Bruto (R$)</label><input id="vt" type="number" step="0.01" readonly/></div>
+      <div class="fg"><label>Pagamento</label><select id="vpg"><option>Dinheiro</option><option>PIX</option><option>Débito</option><option>Crédito</option><option>Compra Online</option><option>Fiado</option></select></div>
       <div class="fg"><label>Data</label><input id="vd" type="date"/></div>
     </div>
     <div class="fa"><button class="btn bp" onclick="salvarV()">💾 Salvar Venda</button><button class="btn" style="background:#eee" onclick="limV()">🧹 Limpar</button></div>
   </div>
-  <div class="fb"><input id="fvb" type="text" placeholder="🔍 Buscar venda..." oninput="renderV()"/></div>
+  <div class="fb"><input id="fvb" type="text" placeholder="🔍 Buscar venda..." oninput="mudarPagV(0)"/></div>
   <div class="tc">
-    <table><thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Cat.</th><th>Qtd</th><th>Total</th><th>Pgto</th><th>Ações</th></tr></thead>
+    <table><thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Cat.</th><th>Qtd</th><th>Pgto</th><th>Total (Líquido)</th><th>Ações</th></tr></thead>
     <tbody id="tbv"></tbody></table>
     <div id="v-pag"></div>
   </div>
@@ -359,15 +360,16 @@ input:checked+.sl:before{transform:translateX(19px)}
         </select>
       </div>
       <div class="fg"><label>Valor (R$) *</label><input id="cv" type="number" step="0.01"/></div>
-      <div class="fg"><label>Pagamento</label><select id="cpg"><option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option><option>Boleto</option><option>A prazo</option></select></div>
+      <div class="fg"><label>Pagamento</label><select id="cpg"><option>Dinheiro</option><option>PIX</option><option>Débito</option><option>Crédito</option><option>Boleto</option><option>A prazo</option><option>Outros</option></select></div>
       <div class="fg"><label>Data</label><input id="cd" type="date"/></div>
     </div>
     <div class="fa"><button class="btn bp" onclick="salvarC()">💾 Salvar Lançamento</button><button class="btn" style="background:#eee" onclick="limC()">🧹 Limpar</button></div>
   </div>
-  <div class="fb"><input id="fcb" type="text" placeholder="🔍 Buscar gasto..." oninput="renderC()"/></div>
+  <div class="fb"><input id="fcb" type="text" placeholder="🔍 Buscar gasto..." oninput="mudarPagCom(0)"/></div>
   <div class="tc">
     <table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Pgto</th><th>Ações</th></tr></thead>
     <tbody id="tbc2"></tbody></table>
+    <div id="c-pag"></div>
   </div>
 </div>
 
@@ -384,10 +386,11 @@ input:checked+.sl:before{transform:translateX(19px)}
     </div>
     <div class="fa"><button class="btn bp" onclick="salvarE()">💾 Salvar Item</button><button class="btn" style="background:#eee" onclick="limE()">🧹 Limpar</button></div>
   </div>
-  <div class="fb"><input id="feb" type="text" placeholder="🔍 Buscar..." oninput="renderE()"/></div>
+  <div class="fb"><input id="feb" type="text" placeholder="🔍 Buscar..." oninput="mudarPagE(0)"/></div>
   <div class="tc">
     <table><thead><tr><th>Item</th><th>Categoria</th><th>Qtd</th><th>Mín</th><th>Custo</th><th>Preço</th><th>Ações</th></tr></thead>
     <tbody id="tbe"></tbody></table>
+    <div id="e-pag"></div>
   </div>
 </div>
 
@@ -402,7 +405,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     </div>
     <div class="fa"><button class="btn bp" onclick="salvarCl()">💾 Salvar Cliente</button><button class="btn" style="background:#eee" onclick="limCl()">🧹 Limpar</button></div>
   </div>
-  <div class="fb"><input id="fclb" type="text" placeholder="🔍 Buscar por nome ou celular..." oninput="renderCl()"/></div>
+  <div class="fb"><input id="fclb" type="text" placeholder="🔍 Buscar por nome ou celular..." oninput="mudarPagCl(0)"/></div>
   <div class="tc">
     <table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Ações</th></tr></thead>
     <tbody id="tbcl"></tbody></table>
@@ -414,22 +417,23 @@ input:checked+.sl:before{transform:translateX(19px)}
   <h2 class="ttl">📈 Relatórios Financeiros</h2>
   <div class="fb">
     <input id="rde" type="date"/><input id="rat" type="date"/>
-    <button class="btn bp" onclick="gerarR()">🔍 Gerar</button>
+    <button class="btn bp" onclick="gerarR(true)">🔍 Gerar</button>
   </div>
   <div class="cr">
-    <div class="dc g"><span class="lb">Total Faturado</span><span class="vl" id="rrv">R$ 0,00</span></div>
+    <div class="dc g"><span class="lb">Total Faturado</span><span class="vl" id="rrv">R$ 0,00</span><span class="sb2">Já abatido de taxas</span></div>
     <div class="dc r"><span class="lb">Custos Loja</span><span class="vl" id="rrc">R$ 0,00</span></div>
     <div class="dc b"><span class="lb">Lucro do Negócio</span><span class="vl" id="rrl">R$ 0,00</span></div>
     <div class="dc o"><span class="lb">Retiradas Sócios</span><span class="vl" id="rrr">R$ 0,00</span></div>
   </div>
   <div class="cx b" style="margin-bottom:20px; text-align:center;">
-    <span class="lb">SALDO FINAL EM CAIXA</span>
+    <span class="lb">SALDO FINAL EM CAIXA DO PERÍODO</span>
     <span class="vl" id="rrs" style="font-size:2rem;">R$ 0,00</span>
     <small>Lucro do Negócio - Retiradas</small>
   </div>
   <div class="tc">
-    <table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Valor</th></tr></thead>
+    <table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Pgto</th><th>Valor (Líquido)</th></tr></thead>
     <tbody id="tbrv"></tbody></table>
+    <div id="r-pag"></div>
   </div>
 </div>
 
@@ -438,30 +442,30 @@ input:checked+.sl:before{transform:translateX(19px)}
 <div class="mo" id="mnp"><div class="mb"><div class="mh"><h3>✨ Novo Pedido</h3><button class="mc" onclick="CM('mnp')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px">
   <div class="fg fl"><label>Cliente *</label><input id="ifc" type="text" placeholder="Nome" list="ifcl" autocomplete="off" oninput="autoFillTel()"/><datalist id="ifcl"></datalist></div>
   <div class="fg fl"><label>Descrição *</label><textarea id="ifd" placeholder="Ex: 10 canecas..."></textarea></div>
-  <div class="fg"><label>Valor total (R$)</label><input id="ifv" type="number" step="0.01"/></div>
-  <div class="fg"><label>Sinal recebido (R$)</label><div style="display:flex;gap:5px;"><input id="ifs" type="number" step="0.01" style="width:50%"/><select id="ifspg" style="width:50%; padding:7px;"><option>PIX</option><option>Dinheiro</option><option>Cartão Crédito</option><option>Cartão Débito</option></select></div></div>
+  <div class="fg"><label>Valor total bruto (R$)</label><input id="ifv" type="number" step="0.01"/></div>
+  <div class="fg"><label>Sinal recebido (R$)</label><div style="display:flex;gap:5px;"><input id="ifs" type="number" step="0.01" style="width:50%"/><select id="ifspg" style="width:50%; padding:7px;"><option>PIX</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option><option>Compra Online</option></select></div></div>
   <div class="fg"><label>WhatsApp</label><input id="ift" type="text" placeholder="(DDD) Número"/></div>
   <div class="fg"><label>Entrega</label><input id="ife" type="date"/></div>
 </div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mnp')">Cancelar</button><button class="btn bp sm" onclick="addCard()">➕ Adicionar</button></div></div></div>
 
-<div class="mo" id="mped"><div class="mb"><div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div><div class="my"><div class="ib" id="mpif"></div><div class="fr"><div class="fi"><label>Total</label><p id="mptot">–</p></div><div class="fi"><label>Sinal</label><p style="color:var(--wa)" id="mpsin">–</p></div><div class="fi"><label>Restante</label><p id="mprest">–</p></div></div>
+<div class="mo" id="mped"><div class="mb"><div class="mh"><h3 id="mptt">📋 Pedido</h3><button class="mc" onclick="CM('mped')">✕</button></div><div class="my"><div class="ib" id="mpif"></div><div class="fr"><div class="fi"><label>Total Bruto</label><p id="mptot">–</p></div><div class="fi"><label>Sinal Bruto</label><p style="color:var(--wa)" id="mpsin">–</p></div><div class="fi"><label>Restante Bruto</label><p id="mprest">–</p></div></div>
   <div class="tr2">
-    <div><div class="tl2">💳 Pago</div><div class="ts"><select id="mppg_met" style="padding:2px; font-size:0.75rem; border-radius:4px; border:1px solid var(--bor); margin-top:3px; outline:none;"><option>PIX</option><option>Dinheiro</option><option>Cartão Crédito</option><option>Cartão Débito</option></select></div></div>
+    <div><div class="tl2">💳 Receber Restante</div><div class="ts"><select id="mppg_met" style="padding:2px; font-size:0.75rem; border-radius:4px; border:1px solid var(--bor); margin-top:3px; outline:none;"><option>PIX</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option><option>Compra Online</option></select></div></div>
     <label class="tg"><input type="checkbox" id="mppg" onchange="togF('pago')"><span class="sl"></span></label>
   </div>
   <div class="tr2"><div><div class="tl2">📦 Entregue</div></div><label class="tg"><input type="checkbox" id="mpeg" onchange="togF('entregue')"><span class="sl"></span></label></div>
 </div><div class="mf"><button class="btn bd sm" onclick="delPA()">🗑️ Excluir</button><button class="btn out sm" onclick="editPA()">✏️ Editar</button><button class="btn bs sm" onclick="abrirLV()">📦 Finalizar / Arquivar</button></div></div></div>
 
-<div class="mo" id="mhc"><div class="mb" style="max-width:600px"><div class="mh"><h3 id="mhctt">👁️ Histórico</h3><button class="mc" onclick="CM('mhc')">✕</button></div><div class="my"><div class="tc" style="box-shadow:none; padding:0;"><table style="min-width:auto;"><thead><tr><th>Data</th><th>Desc</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbhc"></tbody></table></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button></div></div></div>
+<div class="mo" id="mhc"><div class="mb" style="max-width:600px"><div class="mh"><h3 id="mhctt">👁️ Histórico</h3><button class="mc" onclick="CM('mhc')">✕</button></div><div class="my"><div class="tc" style="box-shadow:none; padding:0;"><table style="min-width:auto;"><thead><tr><th>Data</th><th>Desc</th><th>Valor Bruto</th><th>Status</th></tr></thead><tbody id="tbhc"></tbody></table></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mhc')">Fechar</button></div></div></div>
 
-<div class="mo" id="mlv"><div class="mb" style="max-width:430px"><div class="mh" style="color:var(--ok)"><h3>📦 Finalizar e Arquivar</h3><button class="mc" onclick="CM('mlv')">✕</button></div><div class="my"><p style="font-size:.82rem;margin-bottom:12px;color:var(--tl)">O pedido irá para os <strong>Concluídos</strong>. Os recebimentos (Sinal e Pagamento) são lançados automaticamente na aba Vendas.</p><div class="fg-grid" style="gap:9px"><div class="fg fl" style="display:none;"><label>Produto</label><input id="lvp" type="text"/></div><div class="fg" style="display:none;"><label>Valor pendente a lançar (R$)</label><input id="lvt" type="number" step="0.01"/></div><div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="document.getElementById('lvqw').style.display=this.value?'block':'none'"><option value="">— Não abater —</option></select></div><div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button><button class="btn bs sm" onclick="confLV()">✅ Arquivar Pedido</button></div></div></div>
+<div class="mo" id="mlv"><div class="mb" style="max-width:430px"><div class="mh" style="color:var(--ok)"><h3>📦 Finalizar e Arquivar</h3><button class="mc" onclick="CM('mlv')">✕</button></div><div class="my"><p style="font-size:.82rem;margin-bottom:12px;color:var(--tl)">O pedido irá para os <strong>Concluídos</strong>. Os recebimentos (Sinal e Pagamento) são lançados automaticamente na aba Vendas e abatidos das taxas da maquininha.</p><div class="fg-grid" style="gap:9px"><div class="fg fl" style="display:none;"><label>Produto</label><input id="lvp" type="text"/></div><div class="fg" style="display:none;"><label>Valor pendente a lançar</label><input id="lvt" type="number" step="0.01"/></div><div class="fg fl"><label>📦 Abater estoque (opcional)</label><select id="lvest" onchange="document.getElementById('lvqw').style.display=this.value?'block':'none'"><option value="">— Não abater —</option></select></div><div class="fg" id="lvqw" style="display:none"><label>Qtd a abater</label><input id="lvq" type="number" min="1" value="1"/></div></div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mlv')">Cancelar</button><button class="btn bs sm" onclick="confLV()">✅ Arquivar Pedido</button></div></div></div>
 
 <div class="mo" id="mep"><div class="mb"><div class="mh" style="color:var(--in)"><h3>✏️ Editar Pedido</h3><button class="mc" onclick="CM('mep')">✕</button></div><div class="my"><div class="fg-grid" style="gap:9px">
   <div class="fg"><label>Cliente *</label><input id="epc" type="text"/></div>
   <div class="fg"><label>WhatsApp</label><input id="ept" type="text"/></div>
   <div class="fg"><label>Data de entrega</label><input id="epe" type="date"/></div>
   <div class="fg"><label>Valor total (R$)</label><input id="epv" type="number" step="0.01"/></div>
-  <div class="fg"><label>Sinal recebido (R$)</label><div style="display:flex;gap:5px;"><input id="eps" type="number" step="0.01" style="width:50%"/><select id="epspg" style="width:50%; padding:7px;"><option>PIX</option><option>Dinheiro</option><option>Cartão Crédito</option><option>Cartão Débito</option></select></div></div>
+  <div class="fg"><label>Sinal recebido (R$)</label><div style="display:flex;gap:5px;"><input id="eps" type="number" step="0.01" style="width:50%"/><select id="epspg" style="width:50%; padding:7px;"><option>PIX</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option><option>Compra Online</option></select></div></div>
   <div class="fg fl"><label>Descrição *</label><textarea id="epd"></textarea></div>
 </div></div><div class="mf"><button class="btn sm" style="background:#eee" onclick="CM('mep')">Cancelar</button><button class="btn bp sm" onclick="salvarEd()">💾 Salvar</button></div></div></div>
 
@@ -508,13 +512,14 @@ function fazerLogin() {
 }
 function fazerLogout() { auth.signOut(); }
 
-// ── 2. SEPARAÇÃO DE DADOS NO FIREBASE E PAGINAÇÃO GERAL ──
+// ── 2. SEPARAÇÃO DE DADOS NO FIREBASE E PAGINAÇÃO ──
 const K = {p:'pedidos', co:'concluidos', col:'colunas', v:'vendas', c:'compras', e:'estoque', cl:'clientes'};
 let MEM = { [K.p]:[], [K.co]:[], [K.col]:[], [K.v]:[], [K.c]:[], [K.e]:[], [K.cl]:[] };
+
+const ITEMS_PER_PAGE = 5;
+let cp = { co:1, v:1, c:1, e:1, cl:1, r:1 }; // current pages
 let activeFilter = null; 
-let currentPageCl = 1;
-let currentPageV = 1;
-const ITEMS_PER_PAGE = 10;
+let kbQ = '';
 
 const DB = {
   get: k => MEM[k] || [],
@@ -584,10 +589,10 @@ function atualizarTelaAtual() {
   if(active === 'p3') renderC();
   if(active === 'p4') renderE();
   if(active === 'p5') renderCl();
-  if(active === 'p6') gerarR();
+  if(active === 'p6') gerarR(false);
 }
 
-// ── 3. FUNÇÕES ÚTEIS E DRAG TO SCROLL ──
+// ── 3. MATEMÁTICA DE TAXAS E ÚTEIS ──
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
 const brl=v=>'R$ '+Number(v||0).toFixed(2).replace('.',',');
 const hj=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);};
@@ -601,6 +606,41 @@ function CM(id){document.getElementById(id).classList.remove('on')}
 function OM(id){document.getElementById(id).classList.add('on')}
 function conf(m,cb){document.getElementById('cfm').textContent=m;OM('mcf');document.getElementById('cfo').onclick=()=>{cb();CM('mcf')}}
 
+// Calculadora de Taxas
+function calcLiq(val, pgto) {
+    let v = Number(val);
+    if(pgto === 'Débito') return v * 0.984;       // -1.6%
+    if(pgto === 'Crédito') return v * 0.9561;     // -4.39%
+    if(pgto === 'Compra Online') return v * 0.941;// -5.9%
+    return v;
+}
+// Renderizador Visual Bruto vs Líquido
+function brlLq(bruto, liq) {
+    if(bruto > liq) return `<del style="color:#999;font-size:0.7rem">${brl(bruto)}</del><br><span style="color:var(--ok)">${brl(liq)}</span>`;
+    return brl(liq);
+}
+
+// Função de Paginação Universal
+function pagList(lista, idPag, funcMudar, arrKey) {
+    let b = document.getElementById(idPag);
+    if(!b) return lista;
+    if(lista.length <= ITEMS_PER_PAGE) { b.innerHTML = ''; return lista; }
+    let tot = Math.ceil(lista.length / ITEMS_PER_PAGE);
+    if(cp[arrKey] > tot) cp[arrKey] = tot;
+    if(cp[arrKey] < 1) cp[arrKey] = 1;
+    let start = (cp[arrKey] - 1) * ITEMS_PER_PAGE;
+    let end = start + ITEMS_PER_PAGE;
+    b.innerHTML = `<div class="pag-container"><button class="pag-btn" onclick="${funcMudar}(-1)" ${cp[arrKey]===1?'disabled':''}>⬅️ Anterior</button><span class="pag-info">Pág ${cp[arrKey]} de ${tot}</span><button class="pag-btn" onclick="${funcMudar}(1)" ${cp[arrKey]===tot?'disabled':''}>Próxima ➡️</button></div>`;
+    return lista.slice(start, end);
+}
+// Funções de Controle de Página
+function mudarPagC(dir) { cp.co+=dir; renderConc(); }
+function mudarPagV(dir) { cp.v+=dir; renderV(); }
+function mudarPagCom(dir){ cp.c+=dir; renderC(); }
+function mudarPagE(dir) { cp.e+=dir; renderE(); }
+function mudarPagCl(dir){ cp.cl+=dir; renderCl(); }
+function mudarPagR(dir) { cp.r+=dir; gerarR(false); }
+
 function updDL(){
     const cls=DB.get(K.cl) || [];
     ['vcl','ifcl'].forEach(id=>{
@@ -608,16 +648,13 @@ function updDL(){
         if(d) d.innerHTML=cls.map(c=>`<option value="${c.nome}">`).join('');
     });
 }
-
 function copiarTexto(e,t){ e.stopPropagation(); navigator.clipboard.writeText(t).then(()=>toast('📋 Copiado!')) }
-
 function initDragToScroll() {
   const slider = document.getElementById('kb'); let isDown=false,startX,scrollLeft;
   slider.onmousedown=e=>{ if(e.target.closest('.kd')||e.target.closest('.kch')||e.target.closest('button')||e.target.closest('input')||e.target.closest('select')||e.target.closest('.k-tel'))return; isDown=true; startX=e.pageX-slider.offsetLeft; scrollLeft=slider.scrollLeft; };
   slider.onmouseleave=()=>isDown=false; slider.onmouseup=()=>isDown=false;
   slider.onmousemove=e=>{ if(!isDown)return; e.preventDefault(); const x=e.pageX-slider.offsetLeft; slider.scrollLeft=scrollLeft-(x-startX)*1.5; };
 }
-
 document.querySelectorAll('.mo').forEach(m => { m.addEventListener('click', (e) => { if(e.target === m) CM(m.id); }); });
 document.getElementById('vd').value = hj();
 document.getElementById('cd').value = hj();
@@ -627,9 +664,7 @@ function autoFillTel() {
     if (!nomeDigitado) { document.getElementById('ift').value = ''; return; } 
     const cls = DB.get(K.cl) || [];
     const ex = cls.find(c => c.nome.toLowerCase() === nomeDigitado);
-    if (ex && ex.tel) {
-        document.getElementById('ift').value = ex.tel;
-    }
+    if (ex && ex.tel) { document.getElementById('ift').value = ex.tel; }
 }
 
 // ── 4. NAVEGAÇÃO E DASHBOARD ──
@@ -639,7 +674,7 @@ function goTo(n){
   document.getElementById('p'+n).classList.add('on');
   document.getElementById('n'+n).classList.add('on');
   updDL(); 
-  if(n===0) buildDash(); if(n===1) atualizarKanbanEAlertas(); if(n===2) renderV(); if(n===3) renderC(); if(n===4) renderE(); if(n===5) renderCl(); if(n===6) { setRDates(); gerarR(); }
+  if(n===0) buildDash(); if(n===1) atualizarKanbanEAlertas(); if(n===2) renderV(); if(n===3) renderC(); if(n===4) renderE(); if(n===5) renderCl(); if(n===6) { setRDates(); gerarR(true); }
 }
 
 let CHS={};
@@ -651,8 +686,11 @@ function buildDash(){
   const ent=vH.reduce((a,v)=>a+Number(v.total||0),0),sai=cH.reduce((a,c)=>a+Number(c.valor||0),0),sal=ent-sai;
   
   const vM=vs.filter(v=>v.data.startsWith(mes)),cM=cs.filter(c=>c.data.startsWith(mes));
-  const fat=vM.reduce((a,b)=>a+Number(b.total),0);
+  const fat=vM.reduce((a,b)=>a+Number(b.total),0); // Já é o valor líquido (abatido de taxas)
   
+  const dinheiroM = vM.filter(v => v.pgto === 'Dinheiro');
+  const fatDinheiro = dinheiroM.reduce((a,b) => a + Number(b.total), 0);
+
   const custos=cM.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
   const retiradas=cM.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
 
@@ -662,7 +700,7 @@ function buildDash(){
   sv('cxm',brl(fat));sv('cxmq',vM.length+' lançamentos no mês');
 
   sv('dv',brl(fat));sv('dvq',vM.length+' vendas/sinais');
-  sv('dc',brl(custos));sv('dcq',cM.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).length+' compras');
+  sv('ddin',brl(fatDinheiro));sv('ddinq',dinheiroM.length+' em dinheiro');
   sv('dr',brl(retiradas)); 
   
   const lucroLiq = fat - custos;
@@ -677,7 +715,7 @@ function buildDash(){
   const ms=[],lbM=[];
   for(let i=5;i>=0;i--){const mDt=new Date(new Date().getFullYear(),new Date().getMonth()-i,1);ms.push(mDt.toISOString().slice(0,7));lbM.push(mDt.toLocaleDateString('pt-BR',{month:'short'}));}
   if(CHS['ch1'])CHS['ch1'].destroy();
-  CHS['ch1']=new Chart(document.getElementById('ch1').getContext('2d'),{type:'bar',data:{labels:lbM,datasets:[{label:'Vendas',data:ms.map(m=>(DB.get(K.v)||[]).filter(v=>v.data.startsWith(m)).reduce((a,v)=>a+Number(v.total||0),0)),backgroundColor:'#784A91',borderRadius:4},{label:'Custos Loja',data:ms.map(m=>(DB.get(K.c)||[]).filter(c=>c.data.startsWith(m)&&!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,c)=>a+Number(c.valor||0),0)),backgroundColor:'#c62828',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false}});
+  CHS['ch1']=new Chart(document.getElementById('ch1').getContext('2d'),{type:'bar',data:{labels:lbM,datasets:[{label:'Vendas Líquidas',data:ms.map(m=>(DB.get(K.v)||[]).filter(v=>v.data.startsWith(m)).reduce((a,v)=>a+Number(v.total||0),0)),backgroundColor:'#784A91',borderRadius:4},{label:'Custos Loja',data:ms.map(m=>(DB.get(K.c)||[]).filter(c=>c.data.startsWith(m)&&!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,c)=>a+Number(c.valor||0),0)),backgroundColor:'#c62828',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false}});
   
   const cats={};vs.forEach(v=>{const c=v.categoria||'Outros';cats[c]=(cats[c]||0)+Number(v.total||0);});
   if(CHS['ch2'])CHS['ch2'].destroy();
@@ -718,7 +756,7 @@ function renderKB(){
     if(activeFilter==='hoje') cards=cards.filter(p=>!p.entregue&&isT(p.entrega));
     if(activeFilter==='atraso') cards=cards.filter(p=>!p.entregue&&isL(p.entrega));
     if(activeFilter==='pagamento') cards=cards.filter(p=>!p.pago&&Number(p.valor||0)>0);
-    const kbQ=gv('kb-q').toLowerCase();
+    
     if(kbQ) cards=cards.filter(p=>p.cliente.toLowerCase().includes(kbQ)||p.desc.toLowerCase().includes(kbQ));
 
     const tot=cards.reduce((a,p)=>a+Number(p.valor||0),0);
@@ -768,8 +806,9 @@ function addCard(){
   let sVId = null;
   if(sinalVal > 0) {
       sVId = 'v_' + uid();
+      let liq = calcLiq(sinalVal, sinalPgto);
       const vs = DB.get(K.v) || [];
-      vs.unshift({id: sVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Vendas', qtd: 1, total: sinalVal, pgto: sinalPgto, data: hj()});
+      vs.unshift({id: sVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Vendas', qtd: 1, totalBruto: sinalVal, total: liq, pgto: sinalPgto, data: hj()});
       DB.set(K.v, vs);
   }
 
@@ -803,12 +842,13 @@ function togF(f){
   
   if(f === 'pago') {
       if(isC && !p.pago) {
-          let rest = Number(p.valor||0) - Number(p.sinal||0);
-          if(rest > 0) {
+          let restB = Number(p.valor||0) - Number(p.sinal||0);
+          if(restB > 0) {
               let rId = 'v_' + uid();
-              const vs = DB.get(K.v) || [];
               let pgtoMetodo = gv('mppg_met');
-              vs.unshift({id: rId, cliente: p.cliente, produto: 'Restante - ' + p.desc, categoria: 'Vendas', qtd: 1, total: rest, pgto: pgtoMetodo, data: hj()});
+              let restL = calcLiq(restB, pgtoMetodo);
+              const vs = DB.get(K.v) || [];
+              vs.unshift({id: rId, cliente: p.cliente, produto: 'Restante - ' + p.desc, categoria: 'Vendas', qtd: 1, totalBruto: restB, total: restL, pgto: pgtoMetodo, data: hj()});
               DB.set(K.v, vs);
               p.restVId = rId;
           }
@@ -848,12 +888,8 @@ function editPA(){
   document.getElementById('epc').value=p.cliente;document.getElementById('ept').value=p.tel||'';document.getElementById('epe').value=p.entrega||'';document.getElementById('epv').value=p.valor;document.getElementById('eps').value=p.sinal||0;document.getElementById('epd').value=p.desc;
   
   let sMet = 'PIX';
-  if(p.sinalVId) {
-      let v = (DB.get(K.v)||[]).find(x=>x.id===p.sinalVId);
-      if(v) sMet = v.pgto;
-  }
+  if(p.sinalVId) { let v = (DB.get(K.v)||[]).find(x=>x.id===p.sinalVId); if(v) sMet = v.pgto; }
   document.getElementById('epspg').value = sMet;
-
   CM('mped');OM('mep');
 }
 
@@ -861,26 +897,32 @@ function salvarEd(){
   const cli=gv('epc').trim(),desc=gv('epd').trim();if(!cli||!desc)return toast('Preencha os campos!',true);
   const ps=DB.get(K.p);const i=ps.findIndex(p=>p.id===actPed);if(i===-1)return;
   let p = ps[i];
-  let novoSinal = Number(gv('eps')||0);
+  let novoSinalB = Number(gv('eps')||0);
   let novoValor = Number(gv('epv')||0);
   let sinalPgto = gv('epspg');
+  let novoSinalL = calcLiq(novoSinalB, sinalPgto);
   
   let vs = DB.get(K.v) || [];
   if(p.sinalVId) {
       let vi = vs.findIndex(v => v.id === p.sinalVId);
-      if(vi !== -1) { vs[vi].total = novoSinal; vs[vi].cliente = cli; vs[vi].produto = 'Sinal - ' + desc; vs[vi].pgto = sinalPgto; }
-  } else if (novoSinal > 0) {
+      if(vi !== -1) { vs[vi].totalBruto = novoSinalB; vs[vi].total = novoSinalL; vs[vi].cliente = cli; vs[vi].produto = 'Sinal - ' + desc; vs[vi].pgto = sinalPgto; }
+  } else if (novoSinalB > 0) {
       p.sinalVId = 'v_' + uid();
-      vs.unshift({id: p.sinalVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Vendas', qtd: 1, total: novoSinal, pgto: sinalPgto, data: hj()});
+      vs.unshift({id: p.sinalVId, cliente: cli, produto: 'Sinal - ' + desc, categoria: 'Vendas', qtd: 1, totalBruto: novoSinalB, total: novoSinalL, pgto: sinalPgto, data: hj()});
   }
   
   if(p.restVId) {
       let vi = vs.findIndex(v => v.id === p.restVId);
-      if(vi !== -1) { vs[vi].total = novoValor - novoSinal; vs[vi].cliente = cli; vs[vi].produto = 'Restante - ' + desc; }
+      if(vi !== -1) { 
+          let calcRestB = novoValor - novoSinalB;
+          vs[vi].totalBruto = calcRestB; 
+          vs[vi].total = calcLiq(calcRestB, vs[vi].pgto); 
+          vs[vi].cliente = cli; vs[vi].produto = 'Restante - ' + desc; 
+      }
   }
   DB.set(K.v, vs);
 
-  ps[i]={...p,cliente:cli,tel:gv('ept').trim(),entrega:gv('epe')||null,valor:novoValor,sinal:novoSinal,desc};
+  ps[i]={...p,cliente:cli,tel:gv('ept').trim(),entrega:gv('epe')||null,valor:novoValor,sinal:novoSinalB,desc};
   DB.set(K.p,ps);CM('mep');atualizarKanbanEAlertas();toast('Editado!');
 }
 
@@ -901,6 +943,18 @@ function abrirLV(){
 function confLV(){
   const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return; const ped=ps[i];
   
+  if(!ped.pago) {
+     let restB = Number(ped.valor||0) - Number(ped.sinal||0);
+     if(restB > 0) {
+         ped.restVId = 'v_' + uid();
+         let restL = restB; // Se arquivou sem pagar antes, o sistema lança como PIX/Dinheiro (sem taxa).
+         const vs = DB.get(K.v) || [];
+         vs.unshift({id: ped.restVId, cliente: ped.cliente, produto: 'Restante - ' + ped.desc, categoria: 'Vendas', qtd: 1, totalBruto: restB, total: restL, pgto: 'Dinheiro', data: hj()});
+         DB.set(K.v, vs);
+     }
+     ped.pago = true;
+  }
+
   const estId=gv('lvest'); let qtdAbatida = 0;
   if(estId){
       qtdAbatida = Number(gv('lvq')||1);
@@ -919,12 +973,11 @@ function confLV(){
 }
 
 function renderConc(){
-  const b=gv('fc0').toLowerCase(); const d=(DB.get(K.co)||[]).filter(c=>!b||c.cliente.toLowerCase().includes(b));
+  const b=gv('fc0').toLowerCase(); 
+  let d=(DB.get(K.co)||[]).filter(c=>!b||c.cliente.toLowerCase().includes(b));
+  d = pagList(d, 'cs-pag', 'mudarPagC', 'co');
   document.getElementById('tbc').innerHTML=d.length?d.map(c=>`<tr><td>${fd(c.dataConc)}</td><td><strong>${c.cliente}</strong></td><td>${(c.desc||'').slice(0,55)}</td><td style="color:var(--ok);font-weight:700">${brl(c.valor)}</td>
-  <td>
-    <button class="btn bw sm" title="Desfazer e voltar ao Kanban" onclick="desfazerConc('${c.id}')">↩️</button>
-    <button class="btn bd sm" title="Apagar definitivamente" onclick="delConc('${c.id}')">🗑️</button>
-  </td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;">Nenhum concluído</td></tr>';
+  <td><button class="btn bw sm" title="Desfazer e voltar ao Kanban" onclick="desfazerConc('${c.id}')">↩️</button> <button class="btn bd sm" title="Apagar definitivamente" onclick="delConc('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;">Nenhum concluído</td></tr>';
 }
 
 function desfazerConc(id) {
@@ -950,35 +1003,23 @@ function desfazerConc(id) {
 
 function delConc(id){conf('Excluir registro permanentemente?',()=>{DB.set(K.co,DB.get(K.co).filter(x=>x.id!==id));renderConc();toast('Excluído!');});}
 
-// ── 6. VENDAS MANUAIS E PAGINAÇÃO ──
+// ── 6. VENDAS MANUAIS ──
 function calcV(){document.getElementById('vt').value=(Number(gv('vu')||0)*Number(gv('vq')||1)).toFixed(2);}
 function salvarV(){
   const p=gv('vp').trim();if(!p)return toast('Preencha o produto!',true);
   const vs=DB.get(K.v)||[];
-  vs.unshift({id:uid(),cliente:gv('vc').trim(),produto:p,categoria:gv('vcat'),qtd:Number(gv('vq')||1),total:Number(gv('vt')||0),pgto:gv('vpg'),data:gv('vd')||hj()});
+  let bruto = Number(gv('vt')||0); let pg = gv('vpg');
+  let liq = calcLiq(bruto, pg);
+  vs.unshift({id:uid(),cliente:gv('vc').trim(),produto:p,categoria:gv('vcat'),qtd:Number(gv('vq')||1),totalBruto:bruto, total:liq, pgto:pg, data:gv('vd')||hj()});
   DB.set(K.v,vs); limV(); renderV(); toast('Venda salva!');
 }
 function limV(){document.getElementById('vp').value='';document.getElementById('vt').value='';document.getElementById('vc').value='';document.getElementById('vu').value='';document.getElementById('vq').value='1';}
-
-// PAGINAÇÃO DE VENDAS APLICADA AQUI
 function renderV(){
   const b=gv('fvb').toLowerCase(); 
   let d=(DB.get(K.v)||[]).filter(v=>!b||v.cliente.toLowerCase().includes(b)||v.produto.toLowerCase().includes(b));
-  
-  let pagHTML='';
-  if(!b && d.length > ITEMS_PER_PAGE) {
-    const tot=Math.ceil(d.length/ITEMS_PER_PAGE);
-    if(currentPageV>tot) currentPageV=tot;
-    if(currentPageV<1) currentPageV=1;
-    d=d.slice((currentPageV-1)*ITEMS_PER_PAGE, currentPageV*ITEMS_PER_PAGE);
-    pagHTML=`<div class="pag-container"><button class="pag-btn" onclick="mudarPagV(-1)" ${currentPageV===1?'disabled':''}>⬅️ Anterior</button><span class="pag-info">Pág ${currentPageV} de ${tot}</span><button class="pag-btn" onclick="mudarPagV(1)" ${currentPageV===tot?'disabled':''}>Próxima ➡️</button></div>`;
-  } else { currentPageV=1; }
-
-  document.getElementById('tbv').innerHTML=d.length?d.map(v=>`<tr><td>${fd(v.data)}</td><td>${v.cliente}</td><td>${v.produto}</td><td>${v.categoria||'-'}</td><td>${v.qtd||1}</td><td style="color:var(--ok);font-weight:700">${brl(v.total)}</td><td>${v.pgto||'-'}</td><td><button class="btn bd sm" onclick="delV('${v.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;">Nenhuma venda encontrada</td></tr>';
-  document.getElementById('v-pag').innerHTML=pagHTML;
+  d = pagList(d, 'v-pag', 'mudarPagV', 'v');
+  document.getElementById('tbv').innerHTML=d.length?d.map(v=>`<tr><td>${fd(v.data)}</td><td>${v.cliente}</td><td>${v.produto}</td><td>${v.categoria||'-'}</td><td>${v.qtd||1}</td><td><span class="bj p">${v.pgto||'-'}</span></td><td><b>${(v.totalBruto && v.totalBruto>v.total) ? brlLq(v.totalBruto, v.total) : brl(v.total)}</b></td><td><button class="btn bd sm" onclick="delV('${v.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;">Nenhuma venda encontrada</td></tr>';
 }
-
-function mudarPagV(dir){ currentPageV+=dir; renderV(); }
 
 function delV(id){
     conf('Excluir venda?',()=>{
@@ -1004,7 +1045,9 @@ function salvarC(){
 }
 function limC(){document.getElementById('cf').value='';document.getElementById('cv').value='';}
 function renderC(){
-  const b=gv('fcb').toLowerCase(); const d=(DB.get(K.c)||[]).filter(c=>!b||c.fornecedor.toLowerCase().includes(b));
+  const b=gv('fcb').toLowerCase(); 
+  let d=(DB.get(K.c)||[]).filter(c=>!b||c.fornecedor.toLowerCase().includes(b));
+  d = pagList(d, 'c-pag', 'mudarPagCom', 'c');
   document.getElementById('tbc2').innerHTML=d.length?d.map(c=>`<tr><td>${fd(c.data)}</td><td>${c.fornecedor}</td><td>${c.categoria}</td><td style="color:var(--no);font-weight:700">${brl(c.valor)}</td><td>${c.pgto||'-'}</td><td><button class="btn bd sm" onclick="delC('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;">Nenhum lançamento</td></tr>';
 }
 function delC(id){conf('Excluir lançamento?',()=>{DB.set(K.c,DB.get(K.c).filter(x=>x.id!==id));renderC();});}
@@ -1018,12 +1061,14 @@ function salvarE(){
 }
 function limE(){document.getElementById('en').value='';document.getElementById('eq').value='0';document.getElementById('ec').value='';document.getElementById('ep2').value='';}
 function renderE(){
-  const b=gv('feb').toLowerCase(); const d=(DB.get(K.e)||[]).filter(e=>!b||e.nome.toLowerCase().includes(b));
+  const b=gv('feb').toLowerCase(); 
+  let d=(DB.get(K.e)||[]).filter(e=>!b||e.nome.toLowerCase().includes(b));
+  d = pagList(d, 'e-pag', 'mudarPagE', 'e');
   document.getElementById('tbe').innerHTML=d.length?d.map(e=>`<tr><td><strong>${e.nome}</strong></td><td>${e.categoria||'-'}</td><td style="${e.qtd<=e.min?'color:var(--no);font-weight:700':''}">${e.qtd}</td><td>${e.min}</td><td>${brl(e.custo)}</td><td>${brl(e.preco)}</td><td><button class="btn bd sm" onclick="delE('${e.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;">Nenhum item</td></tr>';
 }
 function delE(id){conf('Excluir item?',()=>{DB.set(K.e,DB.get(K.e).filter(x=>x.id!==id));renderE();});}
 
-// ── 9. CLIENTES E PAGINAÇÃO ──
+// ── 9. CLIENTES ──
 function salvarCl(){
   const n=gv('cln').trim();if(!n)return toast('Nome obrigatório!',true);
   const cls=DB.get(K.cl)||[];
@@ -1034,18 +1079,9 @@ function limCl(){document.getElementById('cln').value='';document.getElementById
 function renderCl(){
   const b=gv('fclb').toLowerCase();
   let d=(DB.get(K.cl)||[]).filter(c=>!b||c.nome.toLowerCase().includes(b)||(c.tel&&c.tel.includes(b)));
-  let pagHTML='';
-  if(!b && d.length > ITEMS_PER_PAGE) {
-    const tot=Math.ceil(d.length/ITEMS_PER_PAGE);
-    if(currentPageCl>tot) currentPageCl=tot;
-    if(currentPageCl<1) currentPageCl=1;
-    d=d.slice((currentPageCl-1)*ITEMS_PER_PAGE, currentPageCl*ITEMS_PER_PAGE);
-    pagHTML=`<div class="pag-container"><button class="pag-btn" onclick="mudarPagCl(-1)" ${currentPageCl===1?'disabled':''}>⬅️ Anterior</button><span class="pag-info">Pág ${currentPageCl} de ${tot}</span><button class="pag-btn" onclick="mudarPagCl(1)" ${currentPageCl===tot?'disabled':''}>Próxima ➡️</button></div>`;
-  } else { currentPageCl=1; }
+  d = pagList(d, 'cl-pag', 'mudarPagCl', 'cl');
   document.getElementById('tbcl').innerHTML=d.length?d.map(c=>`<tr><td><strong>${c.nome}</strong></td><td>${c.tel||'-'}</td><td>${c.cidade||'-'}</td><td><button class="btn bp sm" onclick="verHist('${c.nome}')">👁️ Histórico</button> <button class="btn bd sm" onclick="delCl('${c.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;">Nenhum cliente encontrado</td></tr>';
-  document.getElementById('cl-pag').innerHTML=pagHTML;
 }
-function mudarPagCl(dir){ currentPageCl+=dir; renderCl(); }
 function delCl(id){conf('Excluir cliente permanentemente?',()=>{DB.set(K.cl,DB.get(K.cl).filter(x=>x.id!==id));renderCl();});}
 function verHist(nome){
   document.getElementById('mhctt').textContent=`👁️ Histórico: ${nome}`;
@@ -1058,12 +1094,13 @@ function verHist(nome){
 
 // ── 10. RELATÓRIOS FINANCEIROS ──
 function setRDates(){const d=new Date();const y=d.getFullYear(),m=(d.getMonth()+1).toString().padStart(2,'0');document.getElementById('rde').value=`${y}-${m}-01`;document.getElementById('rat').value=hj();}
-function gerarR(){
+function gerarR(reset = true){
+  if(reset) cp.r = 1;
   const de=gv('rde'),at=gv('rat'); if(!de||!at) return;
   const vs=(DB.get(K.v)||[]).filter(v=>v.data>=de&&v.data<=at);
   const cs=(DB.get(K.c)||[]).filter(c=>c.data>=de&&c.data<=at);
   
-  const fat=vs.reduce((a,b)=>a+Number(b.total),0);
+  const fat=vs.reduce((a,b)=>a+Number(b.total),0); // Total líquido real
   const custosLoja=cs.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
   const retiradas=cs.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
   const lucroNegocio=fat-custosLoja;
@@ -1073,8 +1110,11 @@ function gerarR(){
   const sEl=document.getElementById('rrs'); sEl.textContent=brl(saldoFinal);
   sEl.style.color=saldoFinal>=0?'var(--ok)':'var(--no)';
 
-  const movs=[...vs.map(x=>({d:x.data,t:'Venda',desc:x.produto,v:x.total,s:1})),...cs.map(x=>({d:x.data,t:x.categoria,desc:x.fornecedor,v:x.valor,s:-1}))].sort((a,b)=>b.d.localeCompare(a.data));
-  document.getElementById('tbrv').innerHTML=movs.length?movs.map(m=>`<tr><td>${fd(m.d)}</td><td><span class="bj ${m.s>0?'g':(m.t.includes('Retirada')||m.t.includes('Pró-labore')?'o':'r')}">${m.t}</span></td><td>${m.desc}</td><td>${brl(m.v)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;">Sem dados no período</td></tr>';
+  let movs=[...vs.map(x=>({d:x.data,t:'Venda',desc:x.produto,v:x.total,b:x.totalBruto,s:1,pg:x.pgto})),...cs.map(x=>({d:x.data,t:x.categoria,desc:x.fornecedor,v:x.valor,b:x.valor,s:-1,pg:x.pgto}))].sort((a,b)=>b.d.localeCompare(a.d));
+  
+  movs = pagList(movs, 'r-pag', 'mudarPagR', 'r');
+
+  document.getElementById('tbrv').innerHTML=movs.length?movs.map(m=>`<tr><td>${fd(m.d)}</td><td><span class="bj ${m.s>0?'g':((m.t||'').includes('Retirada')||(m.t||'').includes('Pró-labore')?'o':'r')}">${m.t}</span><br><small style="color:var(--tl)">${m.pg||''}</small></td><td>${m.desc}</td><td style="font-weight:700;">${m.s>0?'+':'-'} ${(m.b && m.b > m.v) ? brlLq(m.b, m.v) : brl(m.v)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;">Sem dados no período</td></tr>';
 }
 </script>
 </body>
