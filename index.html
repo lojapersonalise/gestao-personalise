@@ -257,7 +257,7 @@ input:checked+.sl:before{transform:translateX(19px)}
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v11.5 · Smart Tax & UI</div>
+  <div class="sb-foot">v11.6 · Gestão Financeira Avançada</div>
 </div>
 
 <div id="main">
@@ -272,7 +272,7 @@ input:checked+.sl:before{transform:translateX(19px)}
   </div>
   <div class="cr">
     <div class="dc g"><span class="lb">Vendas do mês</span><span class="vl" id="dv">R$ 0,00</span><span class="sb2" id="dvq">0 vendas</span></div>
-    <div class="dc g" style="background:#e8f5e9;"><span class="lb" style="color:var(--ok)">Entradas em Dinheiro</span><span class="vl" id="ddin" style="color:var(--ok)">R$ 0,00</span><span class="sb2" id="ddinq" style="color:var(--ok)">0 no mês</span></div>
+    <div class="dc g" style="background:#e8f5e9;"><span class="lb" style="color:var(--ok)">Valor em Dinheiro</span><span class="vl" id="ddin" style="color:var(--ok)">R$ 0,00</span><span class="sb2" id="ddinq" style="color:var(--ok)">em espécie (gaveta)</span></div>
     <div class="dc o"><span class="lb">Retiradas do Mês</span><span class="vl" id="dr">R$ 0,00</span><span class="sb2">pessoal/sócios</span></div>
     <div class="dc b"><span class="lb">Lucro Líquido</span><span class="vl" id="dl">R$ 0,00</span><span class="sb2" id="dls">vendas reais - custos loja</span></div>
   </div>
@@ -517,7 +517,7 @@ const K = {p:'pedidos', co:'concluidos', col:'colunas', v:'vendas', c:'compras',
 let MEM = { [K.p]:[], [K.co]:[], [K.col]:[], [K.v]:[], [K.c]:[], [K.e]:[], [K.cl]:[] };
 
 const ITEMS_PER_PAGE = 5;
-let cp = { co:1, v:1, c:1, e:1, cl:1, r:1 }; // current pages
+let cp = { co:1, v:1, c:1, e:1, cl:1, r:1 }; 
 let activeFilter = null; 
 let kbQ = '';
 
@@ -609,18 +609,19 @@ function conf(m,cb){document.getElementById('cfm').textContent=m;OM('mcf');docum
 // Calculadora de Taxas
 function calcLiq(val, pgto) {
     let v = Number(val);
-    if(pgto === 'Débito') return v * 0.984;       // -1.6%
-    if(pgto === 'Crédito') return v * 0.9561;     // -4.39%
-    if(pgto === 'Compra Online') return v * 0.941;// -5.9%
+    if(pgto === 'Débito') return v * 0.984;       
+    if(pgto === 'Crédito') return v * 0.9561;     
+    if(pgto === 'Compra Online') return v * 0.941;
     return v;
 }
+
 // Renderizador Visual Bruto vs Líquido
 function brlLq(bruto, liq) {
     if(bruto > liq) return `<del style="color:#999;font-size:0.7rem">${brl(bruto)}</del><br><span style="color:var(--ok)">${brl(liq)}</span>`;
     return brl(liq);
 }
 
-// Função de Paginação Universal
+// Paginação Universal
 function pagList(lista, idPag, funcMudar, arrKey) {
     let b = document.getElementById(idPag);
     if(!b) return lista;
@@ -633,7 +634,7 @@ function pagList(lista, idPag, funcMudar, arrKey) {
     b.innerHTML = `<div class="pag-container"><button class="pag-btn" onclick="${funcMudar}(-1)" ${cp[arrKey]===1?'disabled':''}>⬅️ Anterior</button><span class="pag-info">Pág ${cp[arrKey]} de ${tot}</span><button class="pag-btn" onclick="${funcMudar}(1)" ${cp[arrKey]===tot?'disabled':''}>Próxima ➡️</button></div>`;
     return lista.slice(start, end);
 }
-// Funções de Controle de Página
+
 function mudarPagC(dir) { cp.co+=dir; renderConc(); }
 function mudarPagV(dir) { cp.v+=dir; renderV(); }
 function mudarPagCom(dir){ cp.c+=dir; renderC(); }
@@ -686,10 +687,12 @@ function buildDash(){
   const ent=vH.reduce((a,v)=>a+Number(v.total||0),0),sai=cH.reduce((a,c)=>a+Number(c.valor||0),0),sal=ent-sai;
   
   const vM=vs.filter(v=>v.data.startsWith(mes)),cM=cs.filter(c=>c.data.startsWith(mes));
-  const fat=vM.reduce((a,b)=>a+Number(b.total),0); // Já é o valor líquido (abatido de taxas)
+  const fat=vM.reduce((a,b)=>a+Number(b.total),0);
   
-  const dinheiroM = vM.filter(v => v.pgto === 'Dinheiro');
-  const fatDinheiro = dinheiroM.reduce((a,b) => a + Number(b.total), 0);
+  // LÓGICA DA GAVETA (TODO O DINHEIRO FÍSICO DA LOJA)
+  const entDinheiro = vs.filter(v => v.pgto === 'Dinheiro').reduce((a,b) => a + Number(b.total), 0);
+  const saiDinheiro = cs.filter(c => c.pgto === 'Dinheiro').reduce((a,b) => a + Number(b.valor), 0);
+  const saldoDinheiro = entDinheiro - saiDinheiro;
 
   const custos=cM.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
   const retiradas=cM.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
@@ -700,7 +703,7 @@ function buildDash(){
   sv('cxm',brl(fat));sv('cxmq',vM.length+' lançamentos no mês');
 
   sv('dv',brl(fat));sv('dvq',vM.length+' vendas/sinais');
-  sv('ddin',brl(fatDinheiro));sv('ddinq',dinheiroM.length+' em dinheiro');
+  sv('ddin',brl(saldoDinheiro));sv('ddinq','saldo real em caixa');
   sv('dr',brl(retiradas)); 
   
   const lucroLiq = fat - custos;
@@ -888,8 +891,12 @@ function editPA(){
   document.getElementById('epc').value=p.cliente;document.getElementById('ept').value=p.tel||'';document.getElementById('epe').value=p.entrega||'';document.getElementById('epv').value=p.valor;document.getElementById('eps').value=p.sinal||0;document.getElementById('epd').value=p.desc;
   
   let sMet = 'PIX';
-  if(p.sinalVId) { let v = (DB.get(K.v)||[]).find(x=>x.id===p.sinalVId); if(v) sMet = v.pgto; }
+  if(p.sinalVId) {
+      let v = (DB.get(K.v)||[]).find(x=>x.id===p.sinalVId);
+      if(v) sMet = v.pgto;
+  }
   document.getElementById('epspg').value = sMet;
+
   CM('mped');OM('mep');
 }
 
@@ -943,18 +950,6 @@ function abrirLV(){
 function confLV(){
   const ps=DB.get(K.p); const i=ps.findIndex(p=>p.id===actPed); if(i===-1)return; const ped=ps[i];
   
-  if(!ped.pago) {
-     let restB = Number(ped.valor||0) - Number(ped.sinal||0);
-     if(restB > 0) {
-         ped.restVId = 'v_' + uid();
-         let restL = restB; // Se arquivou sem pagar antes, o sistema lança como PIX/Dinheiro (sem taxa).
-         const vs = DB.get(K.v) || [];
-         vs.unshift({id: ped.restVId, cliente: ped.cliente, produto: 'Restante - ' + ped.desc, categoria: 'Vendas', qtd: 1, totalBruto: restB, total: restL, pgto: 'Dinheiro', data: hj()});
-         DB.set(K.v, vs);
-     }
-     ped.pago = true;
-  }
-
   const estId=gv('lvest'); let qtdAbatida = 0;
   if(estId){
       qtdAbatida = Number(gv('lvq')||1);
@@ -1014,6 +1009,7 @@ function salvarV(){
   DB.set(K.v,vs); limV(); renderV(); toast('Venda salva!');
 }
 function limV(){document.getElementById('vp').value='';document.getElementById('vt').value='';document.getElementById('vc').value='';document.getElementById('vu').value='';document.getElementById('vq').value='1';}
+
 function renderV(){
   const b=gv('fvb').toLowerCase(); 
   let d=(DB.get(K.v)||[]).filter(v=>!b||v.cliente.toLowerCase().includes(b)||v.produto.toLowerCase().includes(b));
@@ -1092,7 +1088,7 @@ function verHist(nome){
   OM('mhc');
 }
 
-// ── 10. RELATÓRIOS FINANCEIROS ──
+// ── 10. RELATÓRIOS FINANCEIROS E PAGINAÇÃO ──
 function setRDates(){const d=new Date();const y=d.getFullYear(),m=(d.getMonth()+1).toString().padStart(2,'0');document.getElementById('rde').value=`${y}-${m}-01`;document.getElementById('rat').value=hj();}
 function gerarR(reset = true){
   if(reset) cp.r = 1;
@@ -1116,6 +1112,7 @@ function gerarR(reset = true){
 
   document.getElementById('tbrv').innerHTML=movs.length?movs.map(m=>`<tr><td>${fd(m.d)}</td><td><span class="bj ${m.s>0?'g':((m.t||'').includes('Retirada')||(m.t||'').includes('Pró-labore')?'o':'r')}">${m.t}</span><br><small style="color:var(--tl)">${m.pg||''}</small></td><td>${m.desc}</td><td style="font-weight:700;">${m.s>0?'+':'-'} ${(m.b && m.b > m.v) ? brlLq(m.b, m.v) : brl(m.v)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;">Sem dados no período</td></tr>';
 }
+
 </script>
 </body>
 </html>
