@@ -35,7 +35,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);di
 .sb-logo {padding: 0 13px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,.15); min-width: 210px; height: 95px;}
 
 /* AQUI: Mudei a transição para 'all' para animar o movimento para o centro também */
-.sidebar-logo {height: 38px; width: 180px; object-fit: contain; object-position: left center; transition: all 0.3s ease;}
+.sidebar-logo {height: 38px; width: 300px; object-fit: contain; object-position: left center; transition: all 0.3s ease;}
 
 /* AQUI: Adicionei o object-position: center center para centralizar quando a barra abre */
 #sb:hover .sidebar-logo {height: 75px; object-position: center center;} 
