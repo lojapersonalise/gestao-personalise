@@ -32,12 +32,13 @@ body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);di
 #sb{width:64px;min-height:100vh;background:var(--p);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:300;transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow:hidden;white-space:nowrap;box-shadow:4px 0 15px rgba(0,0,0,0.05);}
 #sb:hover{width:210px;box-shadow:4px 0 25px rgba(0,0,0,0.15);}
 
-/* AQUI: Aumentei a caixa da logo de 85px para 95px para dar espaço */
 .sb-logo {padding: 0 13px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,.15); min-width: 210px; height: 95px;}
-.sidebar-logo {height: 38px; width: 180px; object-fit: contain; object-position: left center; transition: height 0.3s ease;}
 
-/* AQUI: Aumentei o tamanho da logo quando a barra expande (hover) de 58px para 75px */
-#sb:hover .sidebar-logo {height: 75px;} 
+/* AQUI: Mudei a transição para 'all' para animar o movimento para o centro também */
+.sidebar-logo {height: 38px; width: 180px; object-fit: contain; object-position: left center; transition: all 0.3s ease;}
+
+/* AQUI: Adicionei o object-position: center center para centralizar quando a barra abre */
+#sb:hover .sidebar-logo {height: 75px; object-position: center center;} 
 
 nav{flex:1;padding:12px 0;}
 nav a{display:flex;align-items:center;gap:16px;padding:12px 20px;color:rgba(255,255,255,.82);text-decoration:none;font-size:.9rem;cursor:pointer;border-left:3px solid transparent;transition:background .2s, border .2s;min-width:210px;}
