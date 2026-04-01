@@ -13,11 +13,17 @@ function initThemeAndConfig() {
 
   const setOpts = (id, arr) => { const el = document.getElementById(id); if(el) el.innerHTML = arr.map(i => `<option>${i}</option>`).join(''); };
   
-  setOpts('vcat', APP_CONFIG.categorias_vendas);
+  // Injeta "Ajuste de caixa" nas Vendas
+  let vcatOpts = APP_CONFIG.categorias_vendas.map(i => `<option>${i}</option>`).join('');
+  vcatOpts += `<option style="color:var(--in); font-weight:bold;">Ajuste de caixa</option>`;
+  const elVcat = document.getElementById('vcat');
+  if(elVcat) elVcat.innerHTML = vcatOpts;
+
   setOpts('ecat', APP_CONFIG.categorias_estoque);
   
+  // Injeta "Ajuste de caixa", "Retirada" e "Pró-labore" nas Compras
   let ccatOpts = APP_CONFIG.categorias_despesas.map(i => `<option>${i}</option>`).join('');
-  ccatOpts += `<option style="color:var(--wa); font-weight:bold;">Retirada Pessoal</option><option style="color:var(--wa); font-weight:bold;">Pró-labore</option>`;
+  ccatOpts += `<option style="color:var(--wa); font-weight:bold;">Retirada Pessoal</option><option style="color:var(--wa); font-weight:bold;">Pró-labore</option><option style="color:var(--in); font-weight:bold;">Ajuste de caixa</option>`;
   const elCcat = document.getElementById('ccat');
   if(elCcat) elCcat.innerHTML = ccatOpts;
   
@@ -30,7 +36,6 @@ function initThemeAndConfig() {
   setOpts('cpg', APP_CONFIG.pagamentos_compras);
 }
 
-// Executa as injeções de cores e listas
 initThemeAndConfig();
 
 // =========================================================================
@@ -236,30 +241,49 @@ function buildDash(){
   const vH=vs.filter(v=>v.data===d),cH=cs.filter(c=>c.data===d);
   const ent=vH.reduce((a,v)=>a+Number(v.total||0),0),sai=cH.reduce((a,c)=>a+Number(c.valor||0),0),sal=ent-sai;
   
-  const vM=vs.filter(v=>v.data.startsWith(mes)),cM=cs.filter(c=>c.data.startsWith(mes));
-  const fat=vM.reduce((a,b)=>a+Number(b.total),0);
-  
+  // DADOS TOTAIS (HISTÓRICO COMPLETO PARA O SALDO GERAL)
+  const allVendas = vs.filter(v => v.categoria !== 'Ajuste de caixa').reduce((a,b)=>a+Number(b.total),0);
+  const allAjustesPos = vs.filter(v => v.categoria === 'Ajuste de caixa').reduce((a,b)=>a+Number(b.total),0);
+  const allCustos = cs.filter(c=>!['Retirada Pessoal','Pró-labore','Ajuste de caixa'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
+  const allRetiradas = cs.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
+  const allAjustesNeg = cs.filter(c => c.categoria === 'Ajuste de caixa').reduce((a,b)=>a+Number(b.valor),0);
+
+  const saldoGeral = (allVendas + allAjustesPos) - (allCustos + allRetiradas + allAjustesNeg);
+
+  // LÓGICA DA GAVETA (TODO O DINHEIRO FÍSICO DA LOJA + AJUSTES EM DINHEIRO)
   const entDinheiro = vs.filter(v => v.pgto === 'Dinheiro').reduce((a,b) => a + Number(b.total), 0);
   const saiDinheiro = cs.filter(c => c.pgto === 'Dinheiro').reduce((a,b) => a + Number(b.valor), 0);
   const saldoDinheiro = entDinheiro - saiDinheiro;
 
-  const custos=cM.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
-  const retiradas=cM.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
+  // DADOS DO MÊS ATUAL
+  const vM=vs.filter(v=>v.data.startsWith(mes)), cM=cs.filter(c=>c.data.startsWith(mes));
+  
+  const fatM = vM.filter(v => v.categoria !== 'Ajuste de caixa').reduce((a,b)=>a+Number(b.total),0);
+  const custosM = cM.filter(c=>!['Retirada Pessoal','Pró-labore','Ajuste de caixa'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
+  const retiradasM = cM.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
+  const ajustesPosM = vM.filter(v => v.categoria === 'Ajuste de caixa').reduce((a,b)=>a+Number(b.total),0);
+  const ajustesNegM = cM.filter(c => c.categoria === 'Ajuste de caixa').reduce((a,b)=>a+Number(b.valor),0);
 
+  const lucroLiqM = fatM - custosM;
+  const resultadoMes = (fatM + ajustesPosM) - (custosM + retiradasM + ajustesNegM);
+  const saldoAcumuladoAnterior = saldoGeral - resultadoMes;
+
+  // ATUALIZANDO O DOM
   sv('cxe',brl(ent));sv('cxeq',vH.length+' recebimentos');
   sv('cxs',brl(sai));sv('cxsq',cH.length+' despesas/retiradas');
   const se=document.getElementById('cxd');if(se){se.textContent=brl(sal);se.style.color=sal>=0?'var(--ok)':'var(--no)';}
-  sv('cxm',brl(fat));sv('cxmq',vM.length+' lançamentos no mês');
+  sv('cxm',brl(fatM));sv('cxmq',vM.filter(v=>v.categoria !== 'Ajuste de caixa').length+' vendas/sinais no mês');
 
-  sv('dv',brl(fat));sv('dvq',vM.length+' vendas/sinais');
+  sv('dv',brl(fatM));sv('dvq',vM.filter(v=>v.categoria !== 'Ajuste de caixa').length+' vendas no mês');
   sv('ddin',brl(saldoDinheiro));sv('ddinq','saldo real em caixa');
-  sv('dr',brl(retiradas)); 
+  sv('dr',brl(retiradasM)); 
   
-  const lucroLiq = fat - custos;
-  const dl=document.getElementById('dl');if(dl){dl.textContent=brl(lucroLiq);dl.style.color=lucroLiq>=0?'var(--ok)':'var(--no)';}
+  const dl=document.getElementById('dl');if(dl){dl.textContent=brl(lucroLiqM);dl.style.color=lucroLiqM>=0?'var(--ok)':'var(--no)';}
   
-  const saldoReal = lucroLiq - retiradas;
-  const dsr=document.getElementById('dsr');if(dsr){dsr.textContent=brl(saldoReal);dsr.style.color=saldoReal>=0?'var(--ok)':'var(--no)';}
+  // PAINEL DE SALDO GERAL
+  const dsr = document.getElementById('dsr'); if(dsr){ dsr.textContent = brl(saldoGeral); dsr.style.color = saldoGeral>=0?'var(--ok)':'var(--no)'; }
+  const dsrAnt = document.getElementById('dsr-ant'); if(dsrAnt){ dsrAnt.innerHTML = `Acumulado até mês passado: <b style="color:${saldoAcumuladoAnterior>=0?'var(--ok)':'var(--no)'}">${brl(saldoAcumuladoAnterior)}</b>`; }
+  const dsrMes = document.getElementById('dsr-mes'); if(dsrMes){ dsrMes.innerHTML = `Resultado deste mês: <b style="color:${resultadoMes>=0?'var(--ok)':'var(--no)'}">${brl(resultadoMes)}</b>`; }
 
   sv('dp',ps.filter(p=>!p.entregue).length);
   sv('de',es.length);
@@ -269,10 +293,10 @@ function buildDash(){
   if(CHS['ch1'])CHS['ch1'].destroy();
   const elCh1 = document.getElementById('ch1');
   if(elCh1) {
-      CHS['ch1']=new Chart(elCh1.getContext('2d'),{type:'bar',data:{labels:lbM,datasets:[{label:'Vendas Líquidas',data:ms.map(m=>(DB.get(K.v)||[]).filter(v=>v.data.startsWith(m)).reduce((a,v)=>a+Number(v.total||0),0)),backgroundColor:APP_CONFIG.tema.p,borderRadius:4},{label:'Custos Loja',data:ms.map(m=>(DB.get(K.c)||[]).filter(c=>c.data.startsWith(m)&&!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,c)=>a+Number(c.valor||0),0)),backgroundColor:'#c62828',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false}});
+      CHS['ch1']=new Chart(elCh1.getContext('2d'),{type:'bar',data:{labels:lbM,datasets:[{label:'Vendas Líquidas',data:ms.map(m=>(DB.get(K.v)||[]).filter(v=>v.data.startsWith(m) && v.categoria !== 'Ajuste de caixa').reduce((a,v)=>a+Number(v.total||0),0)),backgroundColor:APP_CONFIG.tema.p,borderRadius:4},{label:'Custos Loja',data:ms.map(m=>(DB.get(K.c)||[]).filter(c=>c.data.startsWith(m)&&!['Retirada Pessoal','Pró-labore','Ajuste de caixa'].includes(c.categoria)).reduce((a,c)=>a+Number(c.valor||0),0)),backgroundColor:'#c62828',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false}});
   }
   
-  const cats={};vs.forEach(v=>{const c=v.categoria||'Outros';cats[c]=(cats[c]||0)+Number(v.total||0);});
+  const cats={};vs.filter(v=>v.categoria!=='Ajuste de caixa').forEach(v=>{const c=v.categoria||'Outros';cats[c]=(cats[c]||0)+Number(v.total||0);});
   if(CHS['ch2'])CHS['ch2'].destroy();
   const elCh2 = document.getElementById('ch2');
   if(elCh2) {
@@ -684,20 +708,24 @@ function gerarR(reset = true){
   const vs=(DB.get(K.v)||[]).filter(v=>v.data>=de&&v.data<=at);
   const cs=(DB.get(K.c)||[]).filter(c=>c.data>=de&&c.data<=at);
   
-  const fat=vs.reduce((a,b)=>a+Number(b.total),0); // Total líquido real
-  const custosLoja=cs.filter(c=>!['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
-  const retiradas=cs.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
-  const lucroNegocio=fat-custosLoja;
-  const saldoFinal=lucroNegocio-retiradas;
+  const fat = vs.filter(v => v.categoria !== 'Ajuste de caixa').reduce((a,b)=>a+Number(b.total),0); 
+  const custosLoja = cs.filter(c=>!['Retirada Pessoal','Pró-labore', 'Ajuste de caixa'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
+  const retiradas = cs.filter(c=>['Retirada Pessoal','Pró-labore'].includes(c.categoria)).reduce((a,b)=>a+Number(b.valor),0);
+  
+  const ajustesPos = vs.filter(v => v.categoria === 'Ajuste de caixa').reduce((a,b)=>a+Number(b.total),0);
+  const ajustesNeg = cs.filter(c => c.categoria === 'Ajuste de caixa').reduce((a,b)=>a+Number(b.valor),0);
+
+  const lucroNegocio = fat - custosLoja;
+  const saldoFinal = (lucroNegocio + ajustesPos) - (retiradas + ajustesNeg);
 
   sv('rrv',brl(fat)); sv('rrc',brl(custosLoja)); sv('rrr',brl(retiradas)); sv('rrl',brl(lucroNegocio));
   const sEl=document.getElementById('rrs'); if(sEl) { sEl.textContent=brl(saldoFinal); sEl.style.color=saldoFinal>=0?'var(--ok)':'var(--no)'; }
 
-  let movs=[...vs.map(x=>({d:x.data,t:'Venda',desc:x.produto,v:x.total,b:x.totalBruto,s:1,pg:x.pgto})),...cs.map(x=>({d:x.data,t:x.categoria,desc:x.fornecedor,v:x.valor,b:x.valor,s:-1,pg:x.pgto}))].sort((a,b)=>b.d.localeCompare(a.d));
+  let movs=[...vs.map(x=>({d:x.data,t:'Venda',desc:x.produto,v:x.total,b:x.totalBruto,s:1,pg:x.pgto, cat:x.categoria})),...cs.map(x=>({d:x.data,t:x.categoria,desc:x.fornecedor,v:x.valor,b:x.valor,s:-1,pg:x.pgto, cat:x.categoria}))].sort((a,b)=>b.d.localeCompare(a.d));
   
   movs = pagList(movs, 'r-pag', 'mudarPagR', 'r');
   const tbrv = document.getElementById('tbrv');
   if(tbrv) {
-    tbrv.innerHTML=movs.length?movs.map(m=>`<tr><td>${fd(m.d)}</td><td><span class="bj ${m.s>0?'g':((m.t||'').includes('Retirada')||(m.t||'').includes('Pró-labore')?'o':'r')}">${m.t||'Geral'}</span><br><small style="color:var(--tl)">${m.pg||''}</small></td><td>${m.desc||'-'}</td><td style="font-weight:700;">${m.s>0?'+':'-'} ${(m.b && m.b > m.v) ? brlLq(m.b, m.v) : brl(m.v)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;">Sem dados no período</td></tr>';
+    tbrv.innerHTML=movs.length?movs.map(m=>`<tr><td>${fd(m.d)}</td><td><span class="bj ${m.s>0?'g':((m.t||'').includes('Retirada')||(m.t||'').includes('Pró-labore')?'o':'r')}">${m.cat === 'Ajuste de caixa' ? 'Ajuste de Caixa' : (m.t||'Geral')}</span><br><small style="color:var(--tl)">${m.pg||''}</small></td><td>${m.desc||'-'}</td><td style="font-weight:700; color:${m.s>0?'var(--ok)':'var(--no)'}">${m.s>0?'+':'-'} ${(m.b && m.b > m.v) ? brlLq(m.b, m.v) : brl(m.v)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;">Sem dados no período</td></tr>';
   }
 }
