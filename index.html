@@ -88,7 +88,7 @@ const FIREBASE_CONFIG = {
     <a id="n6" onclick="goTo(6)"><span class="ic">📈</span><span class="txt">Relatórios</span></a>
     <a onclick="fazerLogout()" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1);"><span class="ic">🚪</span><span class="txt">Sair</span></a>
   </nav>
-  <div class="sb-foot">v11.6 · Modular</div>
+  <div class="sb-foot">v11.7 · Modular</div>
 </div>
 
 <div id="main">
@@ -108,10 +108,14 @@ const FIREBASE_CONFIG = {
     <div class="dc b"><span class="lb">Lucro Líquido</span><span class="vl" id="dl">R$ 0,00</span><span class="sb2" id="dls">vendas reais - custos loja</span></div>
   </div>
   
-  <div class="cx b" style="margin-bottom:20px; text-align:center; border-top-color:var(--ok); background:#f1f8e9;">
-    <span class="lb" style="color:var(--ok)">SALDO REAL DA CONTA (MÊS)</span>
-    <span class="vl" id="dsr" style="font-size:2rem; color:var(--ok)">R$ 0,00</span>
-    <small style="color:var(--tl)">Lucro Líquido - Retiradas</small>
+  <div class="cx b" style="margin-bottom:20px; text-align:center; border-top-color:var(--ok); background:#f1f8e9; display: flex; flex-direction: column; gap: 8px; padding: 20px;">
+    <span class="lb" style="color:var(--ok); font-size: 0.8rem;">SALDO GERAL ACUMULADO (BANCO + GAVETA)</span>
+    <span class="vl" id="dsr" style="font-size:2.4rem; color:var(--ok)">R$ 0,00</span>
+    <div style="display: flex; justify-content: center; gap: 20px; font-size: 0.85rem; color: var(--tl); margin-top: 5px; flex-wrap: wrap;">
+      <span id="dsr-ant">Acumulado até mês passado: <b>R$ 0,00</b></span>
+      <span style="color:var(--bor)">|</span>
+      <span id="dsr-mes">Resultado deste mês: <b>R$ 0,00</b></span>
+    </div>
   </div>
 
   <div class="cr">
@@ -246,7 +250,7 @@ const FIREBASE_CONFIG = {
     <div class="dc o"><span class="lb">Retiradas Sócios</span><span class="vl" id="rrr">R$ 0,00</span></div>
   </div>
   <div class="cx b" style="margin-bottom:20px; text-align:center;">
-    <span class="lb">SALDO FINAL EM CAIXA DO PERÍODO</span>
+    <span class="lb">SALDO FINAL DO PERÍODO SELECIONADO</span>
     <span class="vl" id="rrs" style="font-size:2rem;">R$ 0,00</span>
     <small>Lucro do Negócio - Retiradas</small>
   </div>
